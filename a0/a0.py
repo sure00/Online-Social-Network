@@ -37,10 +37,10 @@ import sys
 import time
 from TwitterAPI import TwitterAPI
 
-consumer_key = 'fixme'
-consumer_secret = 'fixme'
-access_token = 'fixme'
-access_token_secret = 'fixme'
+consumer_key = 'EqritIkuIQDEFtC8X0tHKCSAw'
+consumer_secret = 'XoUbK9DXQpyI9X923fi2cGvQ1pABONUHXVKETmPCpMlc0aebcH'
+access_token = '769354220537602048-lt18gDc963UdQGJinrfIYD8pwkmaiHT'
+access_token_secret = 'ze4ACglFMf5dYfgdL3LUUepgBymJJbu3OCjjN5AvcZpFG'
 
 
 # This method is done for you. Make sure to put your credentials in the file twitter.cfg.
@@ -66,8 +66,19 @@ def read_screen_names(filename):
     >>> read_screen_names('candidates.txt')
     ['DrJillStein', 'GovGaryJohnson', 'HillaryClinton', 'realDonaldTrump']
     """
-    ###TODO
-    pass
+    # Creat a list to store screen name
+    scnameList = []
+
+    # Open the file
+    file =  open(filename,"r")
+
+    # Read name line by line
+    scnameList = [screen_name[:-1] for screen_name in file]
+
+    # Close the file
+    file.close()
+
+    return scnameList
 
 
 # I've provided the method below to handle Twitter's rate limiting.
@@ -112,9 +123,31 @@ def get_users(twitter, screen_names):
     >>> [u['id'] for u in users]
     [6253282, 783214]
     """
-    ###TODO
-    pass
+    # Allocat the string varable to store screen name
 
+    str ="screen_name="
+
+    # save screen name to the string
+    for user in screen_names:
+        str = str + user+','
+
+    # remove last comma
+    str = str[:-1]
+
+    # request lookup command
+    request = robust_request(twitter, 'users/lookup', str )
+
+    return request
+"""
+    userList=[]
+    for user in screen_names:
+        print("request %s " % user)
+        request = robust_request(twitter, 'users/lookup', {'screen_name': user})
+        user = [r for r in request]
+        print(user[0])
+        userList.append(user[0])
+        return userList
+"""
 
 def get_friends(twitter, screen_name):
     """ Return a list of Twitter IDs for users that this person follows, up to 5000.
@@ -137,8 +170,14 @@ def get_friends(twitter, screen_name):
     >>> get_friends(twitter, 'aronwc')[:5]
     [695023, 1697081, 8381682, 10204352, 11669522]
     """
-    ###TODO
-    pass
+
+
+    # request lookup command
+
+    respond  = robust_request(twitter, 'friends/ids', {'screen_name': screen_name}, 5 )
+    friends  = [r for r in respond]
+
+    return (friends)
 
 
 def add_all_friends(twitter, users):
@@ -159,8 +198,11 @@ def add_all_friends(twitter, users):
     >>> users[0]['friends'][:5]
     [695023, 1697081, 8381682, 10204352, 11669522]
     """
-    ###TODO
-    pass
+    for user in users:
+        #print("friend get %s" %get_friends(twitter, user["screen_name"]))
+        user["friends"]= get_friends(twitter, user["screen_name"])
+
+
 
 
 def print_num_friends(users):
@@ -171,8 +213,7 @@ def print_num_friends(users):
     Returns:
         Nothing
     """
-    ###TODO
-    pass
+    #sorted(users, key=lambda x:)
 
 
 def count_friends(users):
