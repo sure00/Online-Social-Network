@@ -9,11 +9,11 @@ Trump.
 
 How is this approach misleading? How might you fix it?
 
+If Jill Stein and Gary Johnson total have 1 million friends and only have 344 overlap friend. The percentage is (344+344)/1000000 =0.344%
+Hilary Clinton and Donald Trump only have one friend and 1 overlap friend. the percentage is 100%
 
-
-
-
-
+so , we need to use the sum of overlap number of friend to divide the total number of friend of the two people.
+Such as (344 +344) / (400000+600000) and compare the percentage value.
 
 
 
@@ -23,11 +23,8 @@ do you think this user is followed by both Hilary Clinton and Donald Trump,
 who are rivals? Do some web searches to see if you can find out more
 information.
 
-
-
-
-
-
+MagicJohnson is a HUGE Hillary Clinton supporter,Magic says he's still open to 
+doing business with Donald Trump --and wants to be friends with the guy -- as long as Hillary is president. 
 
 
 

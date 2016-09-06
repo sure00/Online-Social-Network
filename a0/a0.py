@@ -125,29 +125,15 @@ def get_users(twitter, screen_names):
     """
     # Allocat the string varable to store screen name
 
-    str ="screen_name="
-
-    # save screen name to the string
-    for user in screen_names:
-        str = str + user+','
-
-    # remove last comma
-    str = str[:-1]
-
-    # request lookup command
-    request = robust_request(twitter, 'users/lookup', str )
-
-    return request
-"""
     userList=[]
     for user in screen_names:
-        print("request %s " % user)
         request = robust_request(twitter, 'users/lookup', {'screen_name': user})
         user = [r for r in request]
-        print(user[0])
+
         userList.append(user[0])
-        return userList
-"""
+
+    return userList
+
 
 def get_friends(twitter, screen_name):
     """ Return a list of Twitter IDs for users that this person follows, up to 5000.
@@ -177,6 +163,8 @@ def get_friends(twitter, screen_name):
     respond  = robust_request(twitter, 'friends/ids', {'screen_name': screen_name}, 5 )
     friends  = [r for r in respond]
 
+    friends.sort()
+    #print(friends)
     return (friends)
 
 
@@ -204,7 +192,6 @@ def add_all_friends(twitter, users):
 
 
 
-
 def print_num_friends(users):
     """Print the number of friends per candidate, sorted by candidate name.
     See Log.txt for an example.
@@ -215,6 +202,9 @@ def print_num_friends(users):
     """
     #sorted(users, key=lambda x:)
 
+    sortUser = sorted(users, key=lambda x:x['screen_name'])
+    for user in sortUser:
+        print("%s %d" %(user['screen_name'], len(user['friends'])))
 
 def count_friends(users):
     """ Count how often each friend is followed.
@@ -229,9 +219,11 @@ def count_friends(users):
     >>> c.most_common()
     [(2, 3), (3, 2), (1, 1)]
     """
-    ###TODO
-    pass
+    c = Counter()
+    for user in users:
+        c.update(user['friends'])
 
+    return c
 
 def friend_overlap(users):
     """
@@ -254,8 +246,16 @@ def friend_overlap(users):
     ...     ])
     [('a', 'c', 3), ('a', 'b', 2), ('b', 'c', 2)]
     """
-    ###TODO
-    pass
+    list =[]
+
+    for i in range(len(users)):
+        for j in range(i+1,len(users)):
+            list.append((users[i]['screen_name'], users[j]['screen_name'],
+                         len(set(users[i]['friends']) & set(users[j]['friends']))))
+            #print(set(users[i]['friends']) & set(users[j]['friends']))
+    list = sorted(list , key=lambda  x:-x[2])
+    return list
+
 
 
 def followed_by_hillary_and_donald(users, twitter):
@@ -272,8 +272,43 @@ def followed_by_hillary_and_donald(users, twitter):
         A string containing the single Twitter screen_name of the user
         that is followed by both Hillary Clinton and Donald Trump.
     """
-    ###TODO
-    pass
+    """
+    hillAndDonaldID = []
+    # find HallaryClinton and realDonaldTrump ID and save it to the list followID
+    for user in users:
+        if user['screen_name'] == 'HillaryClinton' or  user['screen_name'] == 'realDonaldTrump':
+            hillAndDonaldID.append(user['id'])
+    #print(hillAndDonaldID)
+
+    for user in users:
+        #if user['screen_name'] != 'HillaryClinton' and  user['screen_name'] != 'realDonaldTrump':
+        # not hillary or donald
+        if user['id'] not in hillAndDonaldID:
+            respond = robust_request(twitter, 'followers/ids', {'screen_name': user['screen_name']}, 5)
+            followers = [r for r in respond]
+            #print(followers)
+            # followers list include hillary and donald
+            #print(set(followers) & set([25073877]))
+            if len(set(followers) & set(hillAndDonaldID) ) == 2:
+                return user['screen_name']
+
+    # find the dictionary of HillaryClinton
+
+"""
+    for user in users:
+       if user['screen_name'] == 'HillaryClinton':
+           list1 = (user['friends'])
+
+    for user in users:
+       if user['screen_name'] == 'realDonaldTrump':
+            list2 = (user['friends'])
+
+    id = list(set(list1) & set(list2))
+
+    request = robust_request(twitter, 'users/lookup', {'user_id': id})
+    common = [r for r in request]
+
+    return common[0]['screen_name']
 
 
 def create_graph(users, friend_counts):
@@ -291,9 +326,18 @@ def create_graph(users, friend_counts):
     Returns:
       A networkx Graph
     """
-    ###TODO
-    pass
+    # create a graph
+    graph = nx.DiGraph()
 
+    #Add a node
+    for user in users:
+        graph.add_node(user['screen_name'])
+
+        for friend in user['friends']:
+            if friend_counts[friend] > 1:
+                graph.add_edge(friend, user['screen_name'])
+
+    return graph
 
 def draw_network(graph, users, filename):
     """
@@ -305,8 +349,18 @@ def draw_network(graph, users, filename):
     Your figure does not have to look exactly the same as mine, but try to
     make it look presentable.
     """
-    ###TODO
-    pass
+
+    custom_labels={}
+    custom_node_sizes = {}
+
+    for user in users:
+        custom_labels[user['screen_name']] = user['screen_name']
+
+    nx.draw(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c')
+    plt.savefig(filename)
+    #plt.show()
+
+
 
 
 def main():
@@ -333,6 +387,8 @@ def main():
 
 
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod(verbose=True)
     main()
 
 # That's it for now! This should give you an introduction to some of the data we'll study in this course.
