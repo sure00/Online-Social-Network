@@ -24,7 +24,8 @@ who are rivals? Do some web searches to see if you can find out more
 information.
 
 MagicJohnson is a HUGE Hillary Clinton supporter,Magic says he's still open to 
-doing business with Donald Trump --and wants to be friends with the guy -- as long as Hillary is president. 
+doing business with Donald Trump --and wants to be friends with the guy -- as 
+long as Hillary is president. 
 
 
 
@@ -36,11 +37,12 @@ doing business with Donald Trump --and wants to be friends with the guy -- as lo
 Johnson follows over 3K accounts, while Donald Trump follows less than
 50). Why do you think this is? How might that affect our analysis?
 
+Trump pay much more attention for his bussiness and his family member such as 
+Trump Organization, Trump golf and Tiffany Trump.
+Gary Johnson pay much more attention on news or publich information such as journalist.
 
-
-
-
-
+The data that from Trump is few and cannot reflect the actual information which we want
+such as his hobbit.
 
 
 
@@ -52,3 +54,12 @@ https://dev.twitter.com/rest/reference/get/friends/ids, how many requests will
 we have to make? Given how Twitter does rate limiting
 (https://dev.twitter.com/rest/public/rate-limiting), approximately how many
 minutes will it take to collect this data?
+
+Causes the list of connections to be broken into pages of no more than 5000 IDs at a time.
+There are 4 candidate. After checking each candidate, the most follows 4k user. So, we need to commit 4 requet.
+
+Meanwhile, 15 Requests / 15-min window (user auth), so we can finish it in 15 min.
+
+
+
+
