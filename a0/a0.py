@@ -356,7 +356,8 @@ def draw_network(graph, users, filename):
     for user in users:
         custom_labels[user['screen_name']] = user['screen_name']
 
-    nx.draw(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c')
+    #nx.draw(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c')
+    nx.draw_networkx(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c',pos=nx.spring_layout(graph),alpha=.5)
     plt.savefig(filename)
     #plt.show()
 
