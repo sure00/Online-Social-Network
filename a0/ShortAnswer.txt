@@ -58,7 +58,17 @@ minutes will it take to collect this data?
 Causes the list of connections to be broken into pages of no more than 5000 IDs at a time.
 There are 4 candidate. After checking each candidate, the most follows 4k user. So, we need to commit 4 requet.
 
-Meanwhile, 15 Requests / 15-min window (user auth), so we can finish it in 15 min.
+In order to get the "friends of friends" of each candidate. we need to call twitter request for 'friends/ids'.
+Below is the list for candidate`s friends.
+
+DrJillStein 4159
+GovGaryJohnson 3124
+HillaryClinton 748
+realDonaldTrump 42
+
+seems we need to request 4159+3124+748+42=8073 times.
+
+Meanwhile, 15 Requests / 15-min window (user auth), so we can finish it in (8073 +4)/15 *15= 8078 min.
 
 
 
