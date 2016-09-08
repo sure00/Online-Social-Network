@@ -53,20 +53,15 @@ we have to make? Given how Twitter does rate limiting
 (https://dev.twitter.com/rest/public/rate-limiting), approximately how many
 minutes will it take to collect this data?
 
-Causes the list of connections to be broken into pages of no more than 5000 IDs at a time.
-There are 4 candidate. After checking each candidate, the most follows 4k user. So, we need to commit 4 requet.
 
 In order to get the "friends of friends" of each candidate. we need to call twitter request for 'friends/ids'.
-Below is the list for candidate`s friends.
+After using below command to fetch the friends of each candidate
 
-DrJillStein 4159
-GovGaryJohnson 3124
-HillaryClinton 748
-realDonaldTrump 42
+print(len(list(friend_counts.keys())))
 
-seems we need to request 4159+3124+748+42=8073 times.
+we can get 7686 friends and we need to request 7686 times twitter to find the friends of the 7686 people.
 
-Meanwhile, 15 Requests / 15-min window (user auth), so we can finish it in (8073 +4)/15 *15= 8078 min.
+Meanwhile, 15 Requests / 15-min window (user auth), so we can finish it in (7686)/15 *15= 7695 min.
 
 
 
