@@ -335,7 +335,7 @@ def create_graph(users, friend_counts):
 
         for friend in user['friends']:
             if friend_counts[friend] > 1:
-                graph.add_edge(friend, user['screen_name'])
+                graph.add_edge( user['screen_name'], friend)
 
     return graph
 
@@ -357,7 +357,7 @@ def draw_network(graph, users, filename):
         custom_labels[user['screen_name']] = user['screen_name']
 
     #nx.draw(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c')
-    nx.draw_networkx(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c',pos=nx.spring_layout(graph),alpha=.5)
+    nx.draw_networkx(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c',pos=nx.spring_layout(graph))
     plt.savefig(filename)
     #plt.show()
 
