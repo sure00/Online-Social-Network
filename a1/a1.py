@@ -88,20 +88,25 @@ def bfs(graph, root, max_depth):
         print(node)
 
         # check whether depth greater than the max depth
-        print("depth is ",node2distances[node])
+        print("node %s depth is %d" %(node ,node2distances[node]))
+
 
         if node2distances[node] > max_depth:
             break
 
         #find the neighbors
         neighbors= graph.neighbors(node)
+        print("neight is", neighbors)
 
         #fileter the child of the node
         childs =list(set(neighbors)-set(node2parents[node]))
+        print("Childs is", childs)
 
         #set childs parent to node
         for child, parent in zip(childs, node):
+            print("child %s, parent %s" % (child, parent))
             node2parents.setdefault(child,[]).append(parent)
+
 
         #node2parents.setdefault({child:node for child in childs}.items())
         #update distance
@@ -116,9 +121,6 @@ def bfs(graph, root, max_depth):
         dq.extend(childs)
 
     return node2distances,node2num_paths,node2parents
-
-
-
 def complexity_of_bfs(V, E, K):
     """
     If V is the number of vertices in a graph, E is the number of
