@@ -75,39 +75,47 @@ def bfs(graph, root, max_depth):
     >>> sorted((node, sorted(parents)) for node, parents in node2parents.items())
     [('B', ['D']), ('D', ['E']), ('F', ['E']), ('G', ['D', 'F'])]
     """
-    distances = {root:0}
-    num_paths={root:1}
-    parents={root:""}
-    level = 0
+    node2distances = {root:0}
+    node2num_paths={root:1}
+    node2parents={root:""}
+
     dq = deque(root)
 
     #loop each node in each level
     while (True):
         # pop the node from the queue
         node = dq.popleft()
+        print(node)
 
         # check whether depth greater than the max depth
-        if distances[node] > max_depth:
+        print("depth is ",node2distances[node])
+
+        if node2distances[node] > max_depth:
             break
 
         #find the neighbors
         neighbors= graph.neighbors(node)
 
         #fileter the child of the node
-        childs =list(set(neighbors)-parents[node])
+        childs =list(set(neighbors)-set(node2parents[node]))
 
         #set childs parent to node
-        parents.update({child:node for child in childs})
+        for child, parent in zip(childs, node):
+            node2parents.setdefault(child,[]).append(parent)
+
+        #node2parents.setdefault({child:node for child in childs}.items())
         #update distance
-        distances.update({child: distances[node]+1 for child in  childs})
+        node2distances.update({child: node2distances[node]+1 for child in  childs})
 
         # Calculate the number of path by sum the number of path of parents
         p = 0
-        for parent in parents[node]:
-            p += num_paths[parent]
-        num_paths[node]=p
+        for parent in node2parents[node]:
+            p += node2num_paths[parent]
+            node2num_paths[node]=p
 
-        dq.append(childs)
+        dq.extend(childs)
+
+    return node2distances,node2num_paths,node2parents
 
 
 
