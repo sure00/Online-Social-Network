@@ -82,45 +82,43 @@ def bfs(graph, root, max_depth):
     dq = deque(root)
 
     #loop each node in each level
-    while (True):
+    while dq:
         # pop the node from the queue
         node = dq.popleft()
-        print(node)
 
         # check whether depth greater than the max depth
-        print("node %s depth is %d" %(node ,node2distances[node]))
-
 
         if node2distances[node] > max_depth:
             break
 
         #find the neighbors
         neighbors= graph.neighbors(node)
-        print("neight is", neighbors)
 
-        #fileter the child of the node
-        childs =list(set(neighbors)-set(node2parents[node]))
-        print("Childs is", childs)
+        childs = []
+        #fileter the child of the node from the neighbors list
+        for n in neighbors:
+            if node2distances.get(n) is None or node2distances[n] > node2distances[node]:
+                childs.extend(n)
 
         #set childs parent to node
-        for child, parent in zip(childs, node):
-            print("child %s, parent %s" % (child, parent))
+        for child, parent in zip(childs, node * len(childs)):
             node2parents.setdefault(child,[]).append(parent)
 
-
         #node2parents.setdefault({child:node for child in childs}.items())
-        #update distance
-        node2distances.update({child: node2distances[node]+1 for child in  childs})
+        node2distances.update({child: node2distances[node]+1 for child in childs})
 
         # Calculate the number of path by sum the number of path of parents
-        p = 0
-        for parent in node2parents[node]:
-            p += node2num_paths[parent]
-            node2num_paths[node]=p
+        for child in childs:
+            p = 0
+            for parent in node2parents[child]:
+                p += node2num_paths[parent]
+            node2num_paths[child]=p
 
-        dq.extend(childs)
+        dq.extend(set(childs)-set(dq))
+    
+    return node2distances, node2num_paths, node2parents 
 
-    return node2distances,node2num_paths,node2parents
+
 def complexity_of_bfs(V, E, K):
     """
     If V is the number of vertices in a graph, E is the number of
