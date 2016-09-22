@@ -88,7 +88,7 @@ def bfs(graph, root, max_depth):
 
         # check whether depth greater than the max depth
 
-        if node2distances[node] > max_depth:
+        if node2distances[node]+1 > max_depth:
             break
 
         #find the neighbors
@@ -115,8 +115,9 @@ def bfs(graph, root, max_depth):
             node2num_paths[child]=p
 
         dq.extend(set(childs)-set(dq))
-    
-    return node2distances, node2num_paths, node2parents 
+
+    del node2parents[root]
+    return node2distances, node2num_paths, node2parents
 
 
 def complexity_of_bfs(V, E, K):
