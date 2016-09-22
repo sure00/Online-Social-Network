@@ -119,7 +119,6 @@ def bfs(graph, root, max_depth):
     del node2parents[root]
     return node2distances, node2num_paths, node2parents
 
-
 def complexity_of_bfs(V, E, K):
     """
     If V is the number of vertices in a graph, E is the number of
