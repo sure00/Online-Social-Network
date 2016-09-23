@@ -252,8 +252,19 @@ def approximate_betweenness(graph, max_depth):
     >>> sorted(approximate_betweenness(example_graph(), 2).items())
     [(('A', 'B'), 2.0), (('A', 'C'), 1.0), (('B', 'C'), 2.0), (('B', 'D'), 6.0), (('D', 'E'), 2.5), (('D', 'F'), 2.0), (('D', 'G'), 2.5), (('E', 'F'), 1.5), (('F', 'G'), 1.5)]
     """
-    ###TODO
-    pass
+    result = Counter()
+    for root in graph.nodes():
+        node2distances, node2num_paths, node2parents = bfs(graph, root, max_depth)
+        #print("root is ", root)
+        betweeness = bottom_up(root, node2distances, node2num_paths, node2parents)
+        #print(betweeness)
+        result.update(betweeness)
+
+    #divide by 2 at the end to get the final betweenness
+    for key in result:
+        result[key] = result[key] / 2
+
+    return result
 
 
 def is_approximation_always_right():
