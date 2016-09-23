@@ -131,8 +131,7 @@ def complexity_of_bfs(V, E, K):
     >>> type(v) == int or type(v) == float
     True
     """
-    ###TODO
-    pass
+    return V + E
 
 
 def bottom_up(root, node2distances, node2num_paths, node2parents):
@@ -170,8 +169,22 @@ def bottom_up(root, node2distances, node2num_paths, node2parents):
     >>> sorted(result.items())
     [(('A', 'B'), 1.0), (('B', 'C'), 1.0), (('B', 'D'), 3.0), (('D', 'E'), 4.5), (('D', 'G'), 0.5), (('E', 'F'), 1.5), (('F', 'G'), 0.5)]
     """
-    ###TODO
-    pass
+    # Convert the parent dict to child dic
+    childDic = {}
+    for child, parents in node2parents.items():
+        for parent in parents:
+            childDic.setdefault(parent, []).append(child)
+
+    #print(childDict)
+    #print(childDict.keys())
+    #print(node2parents.keys())
+
+    # calculate the leaves
+    leaves = list ((set(node2parents.keys()) -set(childDic.keys())))
+    print(leaves)
+
+
+
 
 
 def approximate_betweenness(graph, max_depth):
