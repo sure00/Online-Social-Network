@@ -169,23 +169,67 @@ def bottom_up(root, node2distances, node2num_paths, node2parents):
     >>> sorted(result.items())
     [(('A', 'B'), 1.0), (('B', 'C'), 1.0), (('B', 'D'), 3.0), (('D', 'E'), 4.5), (('D', 'G'), 0.5), (('E', 'F'), 1.5), (('F', 'G'), 0.5)]
     """
+    levelDict = {}
+    for node, level in node2distances.items():
+        levelDict.setdefault(level, []).append(node)
+
+    levelArr = sorted(levelDict.items(), key=lambda x: x[0], reverse=True)
+
     # Convert the parent dict to child dic
     childDic = {}
     for child, parents in node2parents.items():
         for parent in parents:
             childDic.setdefault(parent, []).append(child)
 
-    #print(childDict)
-    #print(childDict.keys())
-    #print(node2parents.keys())
-
-    # calculate the leaves
+    #Calculate the leaves
     leaves = list ((set(node2parents.keys()) -set(childDic.keys())))
-    print(leaves)
+    #print("leaves is ",leaves)
 
+    nodeCredit = {}
+    edgeCredit = {}
+    # go through each node level by level
+    for level in levelArr:
+        if level[0] == 0:
+            break
 
+        # go through each node in each leavel
+        for node in level[1]:
+            # node is leave
+            if node in leaves:
+                #print("leave node is %s, parent is %s" %(node,node2parents[node]))
+                #assign credit 1 to leave
+                nodeCredit[node] = 1
+                #print("node %s credit is %d" %(node,nodeCredit[node] ))
+                # set the credit for edge
+            # node is not leave
+            else:
+                nodeCredit[node] = 0
+                # sum of the credits of the edges from that node to the leavel below
+                for child in childDic[node]:
+                    if child > node:
+                        #print("node is %s, child is %s, credit is %float" % (node, child, edgeCredit[(node,child)]))
+                        nodeCredit[node] += edgeCredit[(node,child)]
+                    else:
+                        #print("node is %s, child is %s, credit is %float" % (node, child, edgeCredit[(child,node)]))
+                        nodeCredit[node] += edgeCredit[(child,node)]
+                # 1 plus the sum
+                nodeCredit[node] +=1
+                #print("non leafe node %s, credit is %s" %(node,nodeCredit[node]))
 
+            # calculate sum pj
+            sumP=0
+            for nodeP in node2parents[node]:
+                sumP +=node2num_paths[nodeP]
 
+            #calculate credit of z times pi divide the sum of pj
+            for nodeP in node2parents[node]:
+                edgeValue = node2num_paths[nodeP]/sumP * nodeCredit[node]
+                if node < nodeP:
+                    edgeCredit[node,nodeP]=edgeValue
+                else:
+                    edgeCredit[nodeP,node] = edgeValue
+    print("edge credit is ", sorted(edgeCredit.items()))
+    return edgeCredit
 
 def approximate_betweenness(graph, max_depth):
     """
