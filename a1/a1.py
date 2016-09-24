@@ -317,8 +317,13 @@ def partition_girvan_newman(graph, max_depth):
     >>> sorted(components[1].nodes())
     ['D', 'E', 'F', 'G']
     """
-    ###TODO
-    pass
+    newGraph = graph.copy()
+    approximate_betweenness(graph, max_depth)
+
+    result = sorted(approximate_betweenness(graph, max_depth).items(), key=lambda x: x[1], reverse = True)
+    newGraph.remove_edge(*result[0][0])
+    components = [c for c in nx.connected_component_subgraphs(newGraph)]
+    return components
 
 def get_subgraph(graph, min_degree):
     """Return a subgraph containing nodes whose degree is
