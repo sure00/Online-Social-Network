@@ -402,8 +402,12 @@ def cut(S, T, graph):
     >>> cut(['A', 'B', 'C'], ['D', 'E', 'F', 'G'], example_graph())
     1
     """
-    ###TODO
-    pass
+    cut_set = 0
+    for edge in graph.edges():
+        if edge[0] in S and edge[1] in T or edge[0] in T and edge[1] in S:
+            #print("S is %s, T is %s, cutset edge is %s" %(S,T,edge))
+            cut_set+=1
+    return cut_set
 
 
 def norm_cut(S, T, graph):
