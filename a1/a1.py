@@ -380,8 +380,11 @@ def volume(nodes, graph):
     >>> volume(['A', 'B', 'C'], example_graph())
     4
     """
-    ###TODO
-    pass
+    vol = 0
+    for edge in graph.edges():
+        if any(endpoints in nodes for endpoints in edge) == True:
+            vol +=1
+    return vol
 
 
 def cut(S, T, graph):
