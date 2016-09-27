@@ -421,8 +421,8 @@ def norm_cut(S, T, graph):
       An float representing the normalized cut value
 
     """
-    ###TODO
-    pass
+    #print("cut(S, T, graph) is %d, volume(S,graph) is %d volume(T,graph) is %d" %(cut(S, T, graph),volume(S,graph), volume(T,graph)))
+    return  float(cut(S, T, graph)/volume(S,graph)) + float(cut(S,T,graph)/volume(T,graph))
 
 
 def score_max_depths(graph, max_depths):
