@@ -344,8 +344,23 @@ def get_subgraph(graph, min_degree):
     >>> len(subgraph.edges())
     2
     """
-    ###TODO
-    pass
+    #creat a new graph
+    subgraph = graph.copy()
+
+    #Store the node which need to be removed from the graph
+    DelNodeList = []
+
+    #check each node`s degree
+    for node in subgraph.nodes():
+        # if degree less than min_degree, append it to the delete node list
+        if len(subgraph.neighbors(node)) < min_degree:
+            DelNodeList.append(node)
+
+    #remove the node from the subgraph
+    for node in DelNodeList:
+        subgraph.remove_node(node)
+
+    return subgraph
 
 
 """"
