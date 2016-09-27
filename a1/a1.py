@@ -419,7 +419,8 @@ def norm_cut(S, T, graph):
       graph...networkx graph
     Returns:
       An float representing the normalized cut value
-
+      >>> norm_cut(['A', 'B', 'C'], ['D', 'E', 'F', 'G'], example_graph())
+      0.41666666666666663
     """
     #print("cut(S, T, graph) is %d, volume(S,graph) is %d volume(T,graph) is %d" %(cut(S, T, graph),volume(S,graph), volume(T,graph)))
     return  float(cut(S, T, graph)/volume(S,graph)) + float(cut(S,T,graph)/volume(T,graph))
