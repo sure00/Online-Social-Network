@@ -131,7 +131,9 @@ def complexity_of_bfs(V, E, K):
     >>> type(v) == int or type(v) == float
     True
     """
-    return V + E
+    #O(V+E)
+    #graph has n(n − 1)/2 edges
+    return V + V(V-1)/2
 
 
 def bottom_up(root, node2distances, node2num_paths, node2parents):
