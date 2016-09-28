@@ -39,17 +39,14 @@ def bfs(graph, root, max_depth):
     E.g., if max_depth=2, only paths of length 2 or less will be considered.
     This means that nodes greather than max_depth distance from the root will not
     appear in the result.
-
     You may use these two classes to help with this implementation:
       https://docs.python.org/3.5/library/collections.html#collections.defaultdict
       https://docs.python.org/3.5/library/collections.html#collections.deque
-
     Params:
       graph.......A networkx Graph
       root........The root node in the search graph (a string). We are computing
                   shortest paths from this node to all others.
       max_depth...An integer representing the maximum depth to search.
-
     Returns:
       node2distances...dict from each node to the length of the shortest path from
                        the root node
@@ -57,9 +54,7 @@ def bfs(graph, root, max_depth):
                        root node that pass through this node.
       node2parents.....dict from each node to the list of its parents in the search
                        tree
-
     In the doctests below, we first try with max_depth=5, then max_depth=2.
-
     >>> node2distances, node2num_paths, node2parents = bfs(example_graph(), 'E', 5)
     >>> sorted(node2distances.items())
     [('A', 3), ('B', 2), ('C', 3), ('D', 1), ('E', 0), ('F', 1), ('G', 2)]
@@ -82,45 +77,43 @@ def bfs(graph, root, max_depth):
     dq = deque(root)
 
     #loop each node in each level
-    while (True):
+    while dq:
         # pop the node from the queue
         node = dq.popleft()
-        print(node)
 
         # check whether depth greater than the max depth
-        print("node %s depth is %d" %(node ,node2distances[node]))
 
-
-        if node2distances[node] > max_depth:
+        if node2distances[node]+1 > max_depth:
             break
 
         #find the neighbors
         neighbors= graph.neighbors(node)
-        print("neight is", neighbors)
 
-        #fileter the child of the node
-        childs =list(set(neighbors)-set(node2parents[node]))
-        print("Childs is", childs)
+        childs = []
+        #fileter the child of the node from the neighbors list
+        for n in neighbors:
+            if node2distances.get(n) is None or node2distances[n] > node2distances[node]:
+                childs.extend(n)
 
         #set childs parent to node
-        for child, parent in zip(childs, node):
-            print("child %s, parent %s" % (child, parent))
+        for child, parent in zip(childs, node * len(childs)):
             node2parents.setdefault(child,[]).append(parent)
 
-
         #node2parents.setdefault({child:node for child in childs}.items())
-        #update distance
-        node2distances.update({child: node2distances[node]+1 for child in  childs})
+        node2distances.update({child: node2distances[node]+1 for child in childs})
 
         # Calculate the number of path by sum the number of path of parents
-        p = 0
-        for parent in node2parents[node]:
-            p += node2num_paths[parent]
-            node2num_paths[node]=p
+        for child in childs:
+            p = 0
+            for parent in node2parents[child]:
+                p += node2num_paths[parent]
+            node2num_paths[child]=p
 
-        dq.extend(childs)
+        dq.extend(set(childs)-set(dq))
 
-    return node2distances,node2num_paths,node2parents
+    del node2parents[root]
+    return node2distances, node2num_paths, node2parents
+
 def complexity_of_bfs(V, E, K):
     """
     If V is the number of vertices in a graph, E is the number of
@@ -133,8 +126,9 @@ def complexity_of_bfs(V, E, K):
     >>> type(v) == int or type(v) == float
     True
     """
-    ###TODO
-    pass
+    #O(V+E)
+    #graph has n(n − 1)/2 edges
+    return V + V(V-1)/2
 
 
 def bottom_up(root, node2distances, node2num_paths, node2parents):
@@ -150,7 +144,6 @@ def bottom_up(root, node2distances, node2num_paths, node2parents):
         path to that node. This credit may be divided among nodes and
         edges above, since there could be several different shortest paths
         to the node. The rules for the calculation are as follows: ...
-
     Params:
       root.............The root node in the search graph (a string). We are computing
                        shortest paths from this node to all others.
@@ -164,41 +157,104 @@ def bottom_up(root, node2distances, node2num_paths, node2parents):
       A dict mapping edges to credit value. Each key is a tuple of two strings
       representing an edge (e.g., ('A', 'B')). Make sure each of these tuples
       are sorted alphabetically (so, it's ('A', 'B'), not ('B', 'A')).
-
       Any edges excluded from the results in bfs should also be exluded here.
-
     >>> node2distances, node2num_paths, node2parents = bfs(example_graph(), 'E', 5)
     >>> result = bottom_up('E', node2distances, node2num_paths, node2parents)
     >>> sorted(result.items())
     [(('A', 'B'), 1.0), (('B', 'C'), 1.0), (('B', 'D'), 3.0), (('D', 'E'), 4.5), (('D', 'G'), 0.5), (('E', 'F'), 1.5), (('F', 'G'), 0.5)]
     """
-    ###TODO
-    pass
+    levelDict = {}
+    for node, level in node2distances.items():
+        levelDict.setdefault(level, []).append(node)
 
+    levelArr = sorted(levelDict.items(), key=lambda x: x[0], reverse=True)
+
+    # Convert the parent dict to child dic
+    childDic = {}
+    for child, parents in node2parents.items():
+        for parent in parents:
+            childDic.setdefault(parent, []).append(child)
+
+    #Calculate the leaves
+    leaves = list ((set(node2parents.keys()) -set(childDic.keys())))
+    #print("leaves is ",leaves)
+
+    nodeCredit = {}
+    edgeCredit = {}
+    # go through each node level by level
+    for level in levelArr:
+        if level[0] == 0:
+            break
+
+        # go through each node in each leavel
+        for node in level[1]:
+            # node is leave
+            if node in leaves:
+                #print("leave node is %s, parent is %s" %(node,node2parents[node]))
+                #assign credit 1 to leave
+                nodeCredit[node] = 1
+                #print("node %s credit is %d" %(node,nodeCredit[node] ))
+                # set the credit for edge
+            # node is not leave
+            else:
+                nodeCredit[node] = 0
+                # sum of the credits of the edges from that node to the leavel below
+                for child in childDic[node]:
+                    if child > node:
+                        #print("node is %s, child is %s, credit is %float" % (node, child, edgeCredit[(node,child)]))
+                        nodeCredit[node] += edgeCredit[(node,child)]
+                    else:
+                        #print("node is %s, child is %s, credit is %float" % (node, child, edgeCredit[(child,node)]))
+                        nodeCredit[node] += edgeCredit[(child,node)]
+                # 1 plus the sum
+                nodeCredit[node] +=1
+                #print("non leafe node %s, credit is %s" %(node,nodeCredit[node]))
+
+            # calculate sum pj
+            sumP=0
+            for nodeP in node2parents[node]:
+                sumP +=node2num_paths[nodeP]
+
+            #calculate credit of z times pi divide the sum of pj
+            for nodeP in node2parents[node]:
+                edgeValue = node2num_paths[nodeP]/sumP * nodeCredit[node]
+                if node < nodeP:
+                    edgeCredit[node,nodeP]=edgeValue
+                else:
+                    edgeCredit[nodeP,node] = edgeValue
+    #print("edge credit is ", sorted(edgeCredit.items()))
+    return edgeCredit
 
 def approximate_betweenness(graph, max_depth):
     """
     Compute the approximate betweenness of each edge, using max_depth to reduce
     computation time in breadth-first search.
-
     You should call the bfs and bottom_up functions defined above for each node
     in the graph, and sum together the results. Be sure to divide by 2 at the
     end to get the final betweenness.
-
     Params:
       graph.......A networkx Graph
       max_depth...An integer representing the maximum depth to search.
-
     Returns:
       A dict mapping edges to betweenness. Each key is a tuple of two strings
       representing an edge (e.g., ('A', 'B')). Make sure each of these tuples
       are sorted alphabetically (so, it's ('A', 'B'), not ('B', 'A')).
-
     >>> sorted(approximate_betweenness(example_graph(), 2).items())
     [(('A', 'B'), 2.0), (('A', 'C'), 1.0), (('B', 'C'), 2.0), (('B', 'D'), 6.0), (('D', 'E'), 2.5), (('D', 'F'), 2.0), (('D', 'G'), 2.5), (('E', 'F'), 1.5), (('F', 'G'), 1.5)]
     """
-    ###TODO
-    pass
+    result = Counter()
+    for root in graph.nodes():
+        node2distances, node2num_paths, node2parents = bfs(graph, root, max_depth)
+        #print("root is ", root)
+        betweeness = bottom_up(root, node2distances, node2num_paths, node2parents)
+        #print(betweeness)
+        result.update(betweeness)
+
+    #divide by 2 at the end to get the final betweenness
+    for key in result:
+        result[key] = result[key] / 2
+
+    return result
 
 
 def is_approximation_always_right():
@@ -206,20 +262,17 @@ def is_approximation_always_right():
     Look at the doctests for approximate betweenness. In this example, the
     edge with the highest betweenness was ('B', 'D') for both cases (when
     max_depth=5 and max_depth=2).
-
     Consider an arbitrary graph G. For all max_depth > 1, will it always be
     the case that the edge with the highest betweenness will be the same
     using either approximate_betweenness verses the exact computation?
     Answer this question below.
-
     In this function, you just need to return either the string 'yes' or 'no'
     (no need to do any actual computations here).
     >>> s = is_approximation_always_right()
     >>> type(s)
     <class 'str'>
     """
-    ###TODO
-    pass
+    return 'yes'
 
 
 def partition_girvan_newman(graph, max_depth):
@@ -230,21 +283,17 @@ def partition_girvan_newman(graph, max_depth):
     those components.
     That is, compute the approximate betweenness of all edges, and remove
     them until multiple comonents are created.
-
     You only need to compute the betweenness once.
     If there are ties in edge betweenness, break by edge name (e.g.,
     (('A', 'B'), 1.0) comes before (('B', 'C'), 1.0)).
-
     Note: the original graph variable should not be modified. Instead,
     make a copy of the original graph prior to removing edges.
     See the Graph.copy method https://networkx.github.io/documentation/development/reference/generated/networkx.Graph.copy.html
     Params:
       graph.......A networkx Graph
       max_depth...An integer representing the maximum depth to search.
-
     Returns:
       A list of networkx Graph objects, one per partition.
-
     >>> components = partition_girvan_newman(example_graph(), 5)
     >>> components = sorted(components, key=lambda x: sorted(x.nodes())[0])
     >>> sorted(components[0].nodes())
@@ -252,28 +301,55 @@ def partition_girvan_newman(graph, max_depth):
     >>> sorted(components[1].nodes())
     ['D', 'E', 'F', 'G']
     """
-    ###TODO
-    pass
+    newGraph = graph.copy()
+    approximate_betweenness(graph, max_depth)
+
+    result = sorted(approximate_betweenness(graph, max_depth).items(), key=lambda x: x[1], reverse = True)
+
+    # iteratively remove edges until the graph is split into more than one component.
+    i = 0
+    while(True):
+        newGraph.remove_edge(*result[i][0])
+        components = [c for c in nx.connected_component_subgraphs(newGraph)]
+        if len(components) >= 1:
+            break
+        elif len(components) == 1:
+            i +=1
+    
+    return components
 
 def get_subgraph(graph, min_degree):
     """Return a subgraph containing nodes whose degree is
     greater than or equal to min_degree.
     We'll use this in the main method to prune the original graph.
-
     Params:
       graph........a networkx graph
       min_degree...degree threshold
     Returns:
       a networkx graph, filtered as defined above.
-
     >>> subgraph = get_subgraph(example_graph(), 3)
     >>> sorted(subgraph.nodes())
     ['B', 'D', 'F']
     >>> len(subgraph.edges())
     2
     """
-    ###TODO
-    pass
+    #creat a new graph
+    subgraph = graph.copy()
+
+    #Store the node which need to be removed from the graph
+    DelNodeList = []
+
+    #check each node`s degree
+    for node in subgraph.nodes():
+        # if degree less than min_degree, append it to the delete node list
+        if len(subgraph.neighbors(node)) < min_degree:
+            DelNodeList.append(node)
+
+    #remove the node from the subgraph
+    for node in DelNodeList:
+        subgraph.remove_node(node)
+
+    return subgraph
 
 
 """"
@@ -289,12 +365,14 @@ def volume(nodes, graph):
     Params:
       nodes...a list of strings for the nodes to compute the volume of.
       graph...a networkx graph
-
     >>> volume(['A', 'B', 'C'], example_graph())
     4
     """
-    ###TODO
-    pass
+    vol = 0
+    for edge in graph.edges():
+        if any(endpoints in nodes for endpoints in edge) == True:
+            vol +=1
+    return vol
 
 
 def cut(S, T, graph):
@@ -308,12 +386,15 @@ def cut(S, T, graph):
       graph...networkx graph
     Returns:
       An int representing the cut-set.
-
     >>> cut(['A', 'B', 'C'], ['D', 'E', 'F', 'G'], example_graph())
     1
     """
-    ###TODO
-    pass
+    cut_set = 0
+    for edge in graph.edges():
+        if edge[0] in S and edge[1] in T or edge[0] in T and edge[1] in S:
+            #print("S is %s, T is %s, cutset edge is %s" %(S,T,edge))
+            cut_set+=1
+    return cut_set
 
 
 def norm_cut(S, T, graph):
@@ -325,10 +406,11 @@ def norm_cut(S, T, graph):
       graph...networkx graph
     Returns:
       An float representing the normalized cut value
-
+      >>> norm_cut(['A', 'B', 'C'], ['D', 'E', 'F', 'G'], example_graph())
+      0.41666666666666663
     """
-    ###TODO
-    pass
+    #print("cut(S, T, graph) is %d, volume(S,graph) is %d volume(T,graph) is %d" %(cut(S, T, graph),volume(S,graph), volume(T,graph)))
+    return  float(cut(S, T, graph)/volume(S,graph)) + float(cut(S,T,graph)/volume(T,graph))
 
 
 def score_max_depths(graph, max_depths):
@@ -337,19 +419,29 @@ def score_max_depths(graph, max_depths):
     we've developed, we will run it with different values for max_depth
     and see how it affects the norm_cut score of the resulting partitions.
     Recall that smaller norm_cut scores correspond to better partitions.
-
     Params:
       graph........a networkx Graph
       max_depths...a list of ints for the max_depth values to be passed
                    to calls to partition_girvan_newman
-
     Returns:
       A list of (int, float) tuples representing the max_depth and the
       norm_cut value obtained by the partitions returned by
       partition_girvan_newman. See Log.txt for an example.
     """
-    ###TODO
-    pass
+    result = []
+
+    for dep in max_depths:
+        #split the graph to two compoents
+        components = partition_girvan_newman(example_graph(), dep)
+        components = sorted(components, key=lambda x: sorted(x.nodes())[0])
+        #get S
+        S = sorted(components[0].nodes())
+        #get T
+        T = sorted(components[1].nodes())
+        # append the tuple to list
+        result.append(dep,norm_cut(S, T, graph))
+
+    return result
 
 
 ## Link prediction
@@ -366,18 +458,14 @@ def make_training_graph(graph, test_node, n):
     test_node, where the neighbors are sorted alphabetically.
     E.g., if 'A' has neighbors 'B' and 'C', and n=1, then the edge
     ('A', 'B') will be removed.
-
     Be sure to *copy* the input graph prior to removing edges.
-
     Params:
       graph.......a networkx Graph
       test_node...a string representing one node in the graph whose
                   edges will be removed.
       n...........the number of edges to remove.
-
     Returns:
       A *new* networkx Graph with n edges removed.
-
     In this doctest, we remove edges for two friends of D:
     >>> g = example_graph()
     >>> sorted(g.neighbors('D'))
@@ -396,22 +484,18 @@ def jaccard(graph, node, k):
     Compute the k highest scoring edges to add to this node based on
     the Jaccard similarity measure.
     Note that we don't return scores for edges that already appear in the graph.
-
     Params:
       graph....a networkx graph
       node.....a node in the graph (a string) to recommend links for.
       k........the number of links to recommend.
-
     Returns:
       A list of tuples in descending order of score representing the
       recommended new edges. Ties are broken by
       alphabetical order of the terminal node in the edge.
-
     In this example below, we remove edges (D, B) and (D, E) from the
     example graph. The top two edges to add according to Jaccard are
     (D, E), with score 0.5, and (D, A), with score 0. (Note that all the
     other remaining edges have score 0, but 'A' is first alphabetically.)
-
     >>> g = example_graph()
     >>> train_graph = make_training_graph(g, 'D', 2)
     >>> jaccard(train_graph, 'D', 2)
@@ -439,27 +523,21 @@ def path_score(graph, root, k, beta, m):
     """
     Compute a new link prediction scoring function based on the shortest
     paths between two nodes, as defined above.
-
     Note that we don't return scores for edges that already appear in the graph.
-
     This algorithm should have the same time complexity as bfs above.
-
     Params:
       graph....a networkx graph
       root.....a node in the graph (a string) to recommend links for.
       k........the number of links to recommend.
       beta.....the beta parameter in the equation above.
       m........the m parameter in the equation above.
-
     Returns:
       A list of tuples in descending order of score. Ties are broken by
       alphabetical order of the terminal node in the edge.
-
     In this example below, we remove edge (D, F) from the
     example graph. The top two edges to add according to path_score are
     (D, F), with score 0.5, and (D, A), with score .25. (Note that (D, C)
     is tied with a score of .25, but (D, A) is first alphabetically.)
-
     >>> g = example_graph()
     >>> train_graph = g.copy()
     >>> train_graph.remove_edge(*('D', 'F'))
@@ -473,18 +551,14 @@ def path_score(graph, root, k, beta, m):
 def evaluate(predicted_edges, graph):
     """
     Return the fraction of the predicted edges that exist in the graph.
-
     Args:
       predicted_edges...a list of edges (tuples) that are predicted to
                         exist in this graph
       graph.............a networkx Graph
-
     Returns:
       The fraction of edges in predicted_edges that exist in the graph.
-
     In this doctest, the edge ('D', 'E') appears in the example_graph,
     but ('D', 'A') does not, so 1/2 = 0.5
-
     >>> evaluate([('D', 'E'), ('D', 'A')], example_graph())
     0.5
     """
