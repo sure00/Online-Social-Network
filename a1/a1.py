@@ -442,9 +442,20 @@ def score_max_depths(graph, max_depths):
       A list of (int, float) tuples representing the max_depth and the
       norm_cut value obtained by the partitions returned by
       partition_girvan_newman. See Log.txt for an example.
-    """
-    ###TODO
-    pass
+    result = []
+
+    for dep in max_depths:
+        #split the graph to two compoents
+        components = partition_girvan_newman(example_graph(), dep)
+        components = sorted(components, key=lambda x: sorted(x.nodes())[0])
+        #get S
+        S = sorted(components[0].nodes())
+        #get T
+        T = sorted(components[1].nodes())
+        # append the tuple to list
+        result.append(dep,norm_cut(S, T, graph))
+
+    return result
 
 
 ## Link prediction
