@@ -74,7 +74,8 @@ def bfs(graph, root, max_depth):
     node2num_paths={root:1}
     node2parents={root:""}
 
-    dq = deque(root)
+    dq = deque()
+    dq.append(root)
 
     #loop each node in each level
     while dq:
@@ -82,30 +83,36 @@ def bfs(graph, root, max_depth):
         node = dq.popleft()
 
         # check whether depth greater than the max depth
-
+        #print("bfs node is",node)
         if node2distances[node]+1 > max_depth:
             break
 
         #find the neighbors
         neighbors= graph.neighbors(node)
+        #print("node is %s neighbors is %s" %(node, neighbors))
 
         childs = []
         #fileter the child of the node from the neighbors list
         for n in neighbors:
+            #print("Each neighbors is", n)
             if node2distances.get(n) is None or node2distances[n] > node2distances[node]:
-                childs.extend(n)
-
+                childs.append(n)
+        #print("childs is ", childs)
         #set childs parent to node
-        for child, parent in zip(childs, node * len(childs)):
-            node2parents.setdefault(child,[]).append(parent)
+        for child in childs:
+            #print("parent is", node)
+            node2parents.setdefault(child,[]).append(node)
 
+        #print("parents is ",node2parents)
         #node2parents.setdefault({child:node for child in childs}.items())
         node2distances.update({child: node2distances[node]+1 for child in childs})
 
         # Calculate the number of path by sum the number of path of parents
+        #print(child)
         for child in childs:
             p = 0
             for parent in node2parents[child]:
+                #print("parent is ", parent)
                 p += node2num_paths[parent]
             node2num_paths[child]=p
 
@@ -244,6 +251,7 @@ def approximate_betweenness(graph, max_depth):
     """
     result = Counter()
     for root in graph.nodes():
+        #print("approximate_betweenness root is", root)
         node2distances, node2num_paths, node2parents = bfs(graph, root, max_depth)
         #print("root is ", root)
         betweeness = bottom_up(root, node2distances, node2num_paths, node2parents)
@@ -369,6 +377,7 @@ def volume(nodes, graph):
     >>> volume(['A', 'B', 'C'], example_graph())
     4
     """
+    #print("volume function")
     vol = 0
     for edge in graph.edges():
         if any(endpoints in nodes for endpoints in edge) == True:
@@ -390,6 +399,7 @@ def cut(S, T, graph):
     >>> cut(['A', 'B', 'C'], ['D', 'E', 'F', 'G'], example_graph())
     1
     """
+    #print("cut function")
     cut_set = 0
     for edge in graph.edges():
         if edge[0] in S and edge[1] in T or edge[0] in T and edge[1] in S:
@@ -433,14 +443,14 @@ def score_max_depths(graph, max_depths):
 
     for dep in max_depths:
         #split the graph to two compoents
-        components = partition_girvan_newman(example_graph(), dep)
+        components = partition_girvan_newman(graph, dep)
         components = sorted(components, key=lambda x: sorted(x.nodes())[0])
         #get S
         S = sorted(components[0].nodes())
         #get T
         T = sorted(components[1].nodes())
         # append the tuple to list
-        result.append(dep,norm_cut(S, T, graph))
+        result.append((dep,norm_cut(S, T, graph)))
 
     return result
 
