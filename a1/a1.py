@@ -322,9 +322,19 @@ def partition_girvan_newman(graph, max_depth):
     newGraph = graph.copy()
     approximate_betweenness(graph, max_depth)
 
-    result = sorted(approximate_betweenness(graph, max_depth).items(), key=lambda x: x[1], reverse = True)
-    newGraph.remove_edge(*result[0][0])
-    components = [c for c in nx.connected_component_subgraphs(newGraph)]
+    result = sorted(approximate_betweenness(graph, max_depth).items(), key=lambda x: x[1], reverse=True)
+
+    # iteratively remove edges until the graph is split into more than one component.
+    i = 0
+    while (True):
+        newGraph.remove_edge(*result[i][0])
+        components = [c for c in nx.connected_component_subgraphs(newGraph)]
+        #print("max_depth is %d cut edge %s num of compoent is %d" %(max_depth, result[i][0],len(components)))
+        if len(components) > 1:
+            break
+        elif len(components) == 1:
+            i += 1
+
     return components
 
 def get_subgraph(graph, min_degree):
