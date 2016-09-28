@@ -230,7 +230,7 @@ def bottom_up(root, node2distances, node2num_paths, node2parents):
                     edgeCredit[node,nodeP]=edgeValue
                 else:
                     edgeCredit[nodeP,node] = edgeValue
-    print("edge credit is ", sorted(edgeCredit.items()))
+    #print("edge credit is ", sorted(edgeCredit.items()))
     return edgeCredit
 
 def approximate_betweenness(graph, max_depth):
