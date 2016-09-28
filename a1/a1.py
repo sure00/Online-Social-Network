@@ -257,11 +257,12 @@ def approximate_betweenness(graph, max_depth):
         betweeness = bottom_up(root, node2distances, node2num_paths, node2parents)
         #print(betweeness)
         result.update(betweeness)
+        #print("node %s degree is %d" %(root, graph.degree(root)))
 
     #divide by 2 at the end to get the final betweenness
     for key in result:
         result[key] = result[key] / 2
-
+    #print("approximate_betweenness",result)
     return result
 
 
@@ -310,15 +311,16 @@ def partition_girvan_newman(graph, max_depth):
     ['D', 'E', 'F', 'G']
     """
     newGraph = graph.copy()
-    approximate_betweenness(graph, max_depth)
 
     result = sorted(approximate_betweenness(graph, max_depth).items(), key=lambda x: x[1], reverse=True)
-
+    #print("partition_girvan_newman result is",result)
     # iteratively remove edges until the graph is split into more than one component.
     i = 0
     while (True):
+        #print("The edgei removed is",result[i][0])
         newGraph.remove_edge(*result[i][0])
         components = [c for c in nx.connected_component_subgraphs(newGraph)]
+        #print("len of components is ",len(components))
         #print("max_depth is %d cut edge %s num of compoent is %d" %(max_depth, result[i][0],len(components)))
         if len(components) > 1:
             break
@@ -447,8 +449,10 @@ def score_max_depths(graph, max_depths):
         components = sorted(components, key=lambda x: sorted(x.nodes())[0])
         #get S
         S = sorted(components[0].nodes())
+        #print("score_max_depths S is", S)
         #get T
         T = sorted(components[1].nodes())
+        #print("score_max_depths T is", T)
         # append the tuple to list
         result.append((dep,norm_cut(S, T, graph)))
 
