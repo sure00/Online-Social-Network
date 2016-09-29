@@ -489,8 +489,13 @@ def make_training_graph(graph, test_node, n):
     >>> sorted(train_graph.neighbors('D'))
     ['F', 'G']
     """
-    ###TODO
-    pass
+    newgraph = graph.copy()
+    neighbors = sorted(newgraph.neighbors(test_node))
+
+    for i in range(n):
+        newgraph.remove_edge(test_node,neighbors[i])
+
+    return newgraph
 
 
 
