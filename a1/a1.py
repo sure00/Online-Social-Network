@@ -84,7 +84,7 @@ def bfs(graph, root, max_depth):
 
         # check whether depth greater than the max depth
         #print("bfs node is",node)
-        if node2distances[node]+1 > max_depth:
+        if  max_depth != None and node2distances[node]+1 > max_depth:
             break
 
         #find the neighbors
@@ -134,8 +134,9 @@ def complexity_of_bfs(V, E, K):
     True
     """
     #O(V+E)
-    #graph has n(n − 1)/2 edges
-    return V + V(V-1)/2
+    #graph has n(n − 1)/2 edges, totalis O(V + V(V-1)/2) = O(V*V)
+
+    return V * V
 
 
 def bottom_up(root, node2distances, node2num_paths, node2parents):
@@ -522,16 +523,16 @@ def jaccard(graph, node, k):
     [(('D', 'E'), 0.5), (('D', 'A'), 0.0)]
     """
     neighbors = set(graph.neighbors(node))
-    print("node is %s, neighbors is %s" %(node,neighbors))
+    #print("node is %s, neighbors is %s" %(node,neighbors))
 
-    print("graph node is ", graph.nodes())
+    #print("graph node is ", graph.nodes())
     # the list that edges not appear in the graph
     notAppearNode = set(graph.nodes())-neighbors-set(node)
 
     scores = []
     for n in notAppearNode:
         neighbors2 = set(graph.neighbors(n))
-        scores.append((n, 1.* len(neighbors & neighbors2) / len(neighbors | neighbors2)))
+        scores.append(((node,n), 1.* len(neighbors & neighbors2) / len(neighbors | neighbors2)))
 
     return sorted(scores, key=lambda x: (-x[1],x[0]))[0:k]
 
@@ -575,22 +576,23 @@ def path_score(graph, root, k, beta):
     [(('D', 'F'), 0.5), (('D', 'A'), 0.25), (('D', 'C'), 0.25)]
     """
     neighbors = set(graph.neighbors(root))
-    print("node is %s, neighbors is %s" %(root,neighbors))
+    #print ("node is %s, neighbors is %s" %(root,neighbors))
 
-    print("graph node is ", graph.nodes())
     # the list that edges not appear in the graph
-    notAppearNode = set(graph.nodes())-neighbors-set(root)
+    notAppearNode = list(set(graph.nodes())-neighbors-set(root))
+    notAppearNode.sort()
 
-    result = []
+    nodedistances, nodenum_paths, nodeparents = bfs(graph, root, None)
+
+    scores = []
 
     for n in notAppearNode:
-        i = nx.shortest_path_length(graph, root, n)
-        print("start is %s, end is %s, length is %d" %(root,n, i))
+        lenShortPath = nodedistances[n]
+        numShortPaths = nodenum_paths[n]
+        #print("node %s lengh of shortest path is%d, numShortPath is %d" %(n, lenShortPath,numShortPaths))
+        scores.append(((root,n), math.pow(beta, lenShortPath) * numShortPaths))
 
-        math.pow(beta, i)
-
-        path = nx.shortest_path(graph,root, n)
-        print(path)
+    return sorted(scores, key=lambda x: x[1], reverse=True)[0:k]
 
 def evaluate(predicted_edges, graph):
     """
@@ -606,8 +608,13 @@ def evaluate(predicted_edges, graph):
     >>> evaluate([('D', 'E'), ('D', 'A')], example_graph())
     0.5
     """
-    ###TODO
-    pass
+    edges = graph.edges()
+    count =0
+    for edge in predicted_edges:
+        if edge in edges or tuple(reversed(edge)) in edges:
+            count +=1
+
+    return 1. * float(count/len(predicted_edges))
 
 
 """
