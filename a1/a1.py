@@ -609,10 +609,12 @@ def evaluate(predicted_edges, graph):
     edges = graph.edges()
     count =0
     for edge in predicted_edges:
-        if edge in edges:
+        if edge in edges or tuple(reversed(edge)) in edges:
             count +=1
 
-    return 1. * count/len(predicted_edges)
+    return 1. * float(count/len(predicted_edges))
+
+
 
 
 """
