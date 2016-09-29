@@ -574,9 +574,23 @@ def path_score(graph, root, k, beta):
     >>> path_score(train_graph, 'D', k=4, beta=.5)
     [(('D', 'F'), 0.5), (('D', 'A'), 0.25), (('D', 'C'), 0.25)]
     """
-    ###TODO
-    pass
+    neighbors = set(graph.neighbors(root))
+    print("node is %s, neighbors is %s" %(root,neighbors))
 
+    print("graph node is ", graph.nodes())
+    # the list that edges not appear in the graph
+    notAppearNode = set(graph.nodes())-neighbors-set(root)
+
+    result = []
+
+    for n in notAppearNode:
+        i = nx.shortest_path_length(graph, root, n)
+        print("start is %s, end is %s, length is %d" %(root,n, i))
+
+        math.pow(beta, i)
+
+        path = nx.shortest_path(graph,root, n)
+        print(path)
 
 def evaluate(predicted_edges, graph):
     """
