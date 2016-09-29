@@ -74,7 +74,8 @@ def bfs(graph, root, max_depth):
     node2num_paths={root:1}
     node2parents={root:""}
 
-    dq = deque(root)
+    dq = deque()
+    dq.append(root)
 
     #loop each node in each level
     while dq:
@@ -82,30 +83,36 @@ def bfs(graph, root, max_depth):
         node = dq.popleft()
 
         # check whether depth greater than the max depth
-
+        #print("bfs node is",node)
         if node2distances[node]+1 > max_depth:
             break
 
         #find the neighbors
         neighbors= graph.neighbors(node)
+        #print("node is %s neighbors is %s" %(node, neighbors))
 
         childs = []
         #fileter the child of the node from the neighbors list
         for n in neighbors:
+            #print("Each neighbors is", n)
             if node2distances.get(n) is None or node2distances[n] > node2distances[node]:
-                childs.extend(n)
-
+                childs.append(n)
+        #print("childs is ", childs)
         #set childs parent to node
-        for child, parent in zip(childs, node * len(childs)):
-            node2parents.setdefault(child,[]).append(parent)
+        for child in childs:
+            #print("parent is", node)
+            node2parents.setdefault(child,[]).append(node)
 
+        #print("parents is ",node2parents)
         #node2parents.setdefault({child:node for child in childs}.items())
         node2distances.update({child: node2distances[node]+1 for child in childs})
 
         # Calculate the number of path by sum the number of path of parents
+        #print(child)
         for child in childs:
             p = 0
             for parent in node2parents[child]:
+                #print("parent is ", parent)
                 p += node2num_paths[parent]
             node2num_paths[child]=p
 
@@ -244,16 +251,18 @@ def approximate_betweenness(graph, max_depth):
     """
     result = Counter()
     for root in graph.nodes():
+        #print("approximate_betweenness root is", root)
         node2distances, node2num_paths, node2parents = bfs(graph, root, max_depth)
         #print("root is ", root)
         betweeness = bottom_up(root, node2distances, node2num_paths, node2parents)
         #print(betweeness)
         result.update(betweeness)
+        #print("node %s degree is %d" %(root, graph.degree(root)))
 
     #divide by 2 at the end to get the final betweenness
     for key in result:
         result[key] = result[key] / 2
-
+    #print("approximate_betweenness",result)
     return result
 
 
@@ -302,15 +311,16 @@ def partition_girvan_newman(graph, max_depth):
     ['D', 'E', 'F', 'G']
     """
     newGraph = graph.copy()
-    approximate_betweenness(graph, max_depth)
 
     result = sorted(approximate_betweenness(graph, max_depth).items(), key=lambda x: x[1], reverse=True)
-
+    #print("partition_girvan_newman result is",result)
     # iteratively remove edges until the graph is split into more than one component.
     i = 0
     while (True):
+        #print("The edgei removed is",result[i][0])
         newGraph.remove_edge(*result[i][0])
         components = [c for c in nx.connected_component_subgraphs(newGraph)]
+        #print("len of components is ",len(components))
         #print("max_depth is %d cut edge %s num of compoent is %d" %(max_depth, result[i][0],len(components)))
         if len(components) > 1:
             break
@@ -369,6 +379,7 @@ def volume(nodes, graph):
     >>> volume(['A', 'B', 'C'], example_graph())
     4
     """
+    #print("volume function")
     vol = 0
     for edge in graph.edges():
         if any(endpoints in nodes for endpoints in edge) == True:
@@ -390,6 +401,7 @@ def cut(S, T, graph):
     >>> cut(['A', 'B', 'C'], ['D', 'E', 'F', 'G'], example_graph())
     1
     """
+    #print("cut function")
     cut_set = 0
     for edge in graph.edges():
         if edge[0] in S and edge[1] in T or edge[0] in T and edge[1] in S:
@@ -433,14 +445,16 @@ def score_max_depths(graph, max_depths):
 
     for dep in max_depths:
         #split the graph to two compoents
-        components = partition_girvan_newman(example_graph(), dep)
+        components = partition_girvan_newman(graph, dep)
         components = sorted(components, key=lambda x: sorted(x.nodes())[0])
         #get S
         S = sorted(components[0].nodes())
+        #print("score_max_depths S is", S)
         #get T
         T = sorted(components[1].nodes())
+        #print("score_max_depths T is", T)
         # append the tuple to list
-        result.append(dep,norm_cut(S, T, graph))
+        result.append((dep,norm_cut(S, T, graph)))
 
     return result
 
@@ -475,8 +489,13 @@ def make_training_graph(graph, test_node, n):
     >>> sorted(train_graph.neighbors('D'))
     ['F', 'G']
     """
-    ###TODO
-    pass
+    newgraph = graph.copy()
+    neighbors = sorted(newgraph.neighbors(test_node))
+
+    for i in range(n):
+        newgraph.remove_edge(test_node,neighbors[i])
+
+    return newgraph
 
 
 
@@ -502,8 +521,19 @@ def jaccard(graph, node, k):
     >>> jaccard(train_graph, 'D', 2)
     [(('D', 'E'), 0.5), (('D', 'A'), 0.0)]
     """
-    ###TODO
-    pass
+    neighbors = set(graph.neighbors(node))
+    print("node is %s, neighbors is %s" %(node,neighbors))
+
+    print("graph node is ", graph.nodes())
+    # the list that edges not appear in the graph
+    notAppearNode = set(graph.nodes())-neighbors-set(node)
+
+    scores = []
+    for n in notAppearNode:
+        neighbors2 = set(graph.neighbors(n))
+        scores.append((n, 1.* len(neighbors & neighbors2) / len(neighbors | neighbors2)))
+
+    return sorted(scores, key=lambda x: (-x[1],x[0]))[0:k]
 
 
 # One limitation of Jaccard is that it only has non-zero values for nodes two hops away.
@@ -544,9 +574,23 @@ def path_score(graph, root, k, beta):
     >>> path_score(train_graph, 'D', k=4, beta=.5)
     [(('D', 'F'), 0.5), (('D', 'A'), 0.25), (('D', 'C'), 0.25)]
     """
-    ###TODO
-    pass
+    neighbors = set(graph.neighbors(root))
+    print("node is %s, neighbors is %s" %(root,neighbors))
 
+    print("graph node is ", graph.nodes())
+    # the list that edges not appear in the graph
+    notAppearNode = set(graph.nodes())-neighbors-set(root)
+
+    result = []
+
+    for n in notAppearNode:
+        i = nx.shortest_path_length(graph, root, n)
+        print("start is %s, end is %s, length is %d" %(root,n, i))
+
+        math.pow(beta, i)
+
+        path = nx.shortest_path(graph,root, n)
+        print(path)
 
 def evaluate(predicted_edges, graph):
     """
