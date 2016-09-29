@@ -521,8 +521,19 @@ def jaccard(graph, node, k):
     >>> jaccard(train_graph, 'D', 2)
     [(('D', 'E'), 0.5), (('D', 'A'), 0.0)]
     """
-    ###TODO
-    pass
+    neighbors = set(graph.neighbors(node))
+    print("node is %s, neighbors is %s" %(node,neighbors))
+
+    print("graph node is ", graph.nodes())
+    # the list that edges not appear in the graph
+    notAppearNode = set(graph.nodes())-neighbors-set(node)
+
+    scores = []
+    for n in notAppearNode:
+        neighbors2 = set(graph.neighbors(n))
+        scores.append((n, 1.* len(neighbors & neighbors2) / len(neighbors | neighbors2)))
+
+    return sorted(scores, key=lambda x: (-x[1],x[0]))[0:k]
 
 
 # One limitation of Jaccard is that it only has non-zero values for nodes two hops away.
