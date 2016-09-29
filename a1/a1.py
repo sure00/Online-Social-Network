@@ -577,20 +577,20 @@ def path_score(graph, root, k, beta):
     neighbors = set(graph.neighbors(root))
     print("node is %s, neighbors is %s" %(root,neighbors))
 
-    print("graph node is ", graph.nodes())
     # the list that edges not appear in the graph
     notAppearNode = set(graph.nodes())-neighbors-set(root)
 
-    result = []
+    nodedistances, nodenum_paths, nodeparents = bfs(graph, root, None)
+
+    scores = []
 
     for n in notAppearNode:
-        i = nx.shortest_path_length(graph, root, n)
-        print("start is %s, end is %s, length is %d" %(root,n, i))
+        lenShortPath = nodedistances[n]
+        numShortPaths = nodenum_paths[n]
+        print("node %s lengh of shortest path is%d, numShortPath is %d" %(n, lenShortPath,numShortPaths))
+        scores.append(((root,n), math.pow(beta, lenShortPath) * numShortPaths))
 
-        math.pow(beta, i)
-
-        path = nx.shortest_path(graph,root, n)
-        print(path)
+    return sorted(scores, key=lambda x: (-x[1], x[0]))[0:k]
 
 def evaluate(predicted_edges, graph):
     """
@@ -606,8 +606,13 @@ def evaluate(predicted_edges, graph):
     >>> evaluate([('D', 'E'), ('D', 'A')], example_graph())
     0.5
     """
-    ###TODO
-    pass
+    edges = graph.edges()
+    count =0
+    for edge in predicted_edges:
+        if edge in edges:
+            count +=1
+
+    return 1. * count/len(predicted_edges)
 
 
 """
