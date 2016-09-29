@@ -523,18 +523,19 @@ def jaccard(graph, node, k):
     [(('D', 'E'), 0.5), (('D', 'A'), 0.0)]
     """
     neighbors = set(graph.neighbors(node))
-    #print("node is %s, neighbors is %s" %(node,neighbors))
 
-    #print("graph node is ", graph.nodes())
     # the list that edges not appear in the graph
-    notAppearNode = set(graph.nodes())-neighbors-set(node)
+    notAppearNode = list(set(graph.nodes())-neighbors)
+    notAppearNode.remove(node)
+
+    notAppearNode.sort()
 
     scores = []
     for n in notAppearNode:
         neighbors2 = set(graph.neighbors(n))
         scores.append(((node,n), 1.* len(neighbors & neighbors2) / len(neighbors | neighbors2)))
 
-    return sorted(scores, key=lambda x: (-x[1],x[0]))[0:k]
+    return sorted(scores, key=lambda x: (-x[1], x[0]))[0:k]
 
 
 # One limitation of Jaccard is that it only has non-zero values for nodes two hops away.
@@ -579,7 +580,8 @@ def path_score(graph, root, k, beta):
     #print ("node is %s, neighbors is %s" %(root,neighbors))
 
     # the list that edges not appear in the graph
-    notAppearNode = list(set(graph.nodes())-neighbors-set(root))
+    notAppearNode = list(set(graph.nodes())-neighbors)
+    notAppearNode.remove(root)
     notAppearNode.sort()
 
     nodedistances, nodenum_paths, nodeparents = bfs(graph, root, None)
