@@ -589,10 +589,13 @@ def path_score(graph, root, k, beta):
     for n in notAppearNode:
         lenShortPath = nodedistances[n]
         numShortPaths = nodenum_paths[n]
+
         #print("node %s lengh of shortest path is%d, numShortPath is %d" %(n, lenShortPath,numShortPaths))
         scores.append(((root,n), math.pow(beta, lenShortPath) * numShortPaths))
 
     return sorted(scores, key=lambda x: x[1], reverse=True)[0:k]
+
+
 
 def evaluate(predicted_edges, graph):
     """
