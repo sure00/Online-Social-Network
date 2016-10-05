@@ -282,7 +282,7 @@ def is_approximation_always_right():
     >>> type(s)
     <class 'str'>
     """
-    return 'yes'
+    return 'no'
 
 
 def partition_girvan_newman(graph, max_depth):
