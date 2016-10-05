@@ -282,7 +282,7 @@ def is_approximation_always_right():
     >>> type(s)
     <class 'str'>
     """
-    return 'yes'
+    return 'no'
 
 
 def partition_girvan_newman(graph, max_depth):
@@ -313,7 +313,7 @@ def partition_girvan_newman(graph, max_depth):
     """
     newGraph = graph.copy()
 
-    result = sorted(approximate_betweenness(graph, max_depth).items(), key=lambda x: x[1], reverse=True)
+    result = sorted(approximate_betweenness(graph, max_depth).items(), key=lambda x: (-x[1],x[0][0]))
     #print("partition_girvan_newman result is",result)
     # iteratively remove edges until the graph is split into more than one component.
     i = 0
