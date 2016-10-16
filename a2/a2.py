@@ -93,11 +93,15 @@ def tokenize(doc, keep_internal_punct=False):
     array(['hi', 'there', "isn't", 'this', 'fun'], 
           dtype='<U5')
     """
+    newdoc=doc.strip()
+    newdoc.strip('.?!\s')
 
     if keep_internal_punct is False:
-        return re.sub('\W+', ' ', doc.lower()).splite()
+        return np.array((re.sub(r'\W+', ' ', newdoc.lower()).strip()).split())
     else:
-        return re.sub('[^A-Za-z0-9]+', ' ', doc.lower()).splite()
+        #return np.array((re.split(r"[!?,;.\s]\s*", newdoc.lower())))
+        #return re.sub('[^A-Za-z0-9]+', ' ', doc.lower()).split()
+        return np.array((re.sub(r'[!?,;.\s]\s*', ' ', newdoc.lower()).strip()).split())
 
 
 
