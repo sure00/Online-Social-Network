@@ -93,8 +93,12 @@ def tokenize(doc, keep_internal_punct=False):
     array(['hi', 'there', "isn't", 'this', 'fun'], 
           dtype='<U5')
     """
-    ###TODO
-    pass
+
+    if keep_internal_punct is False:
+        return re.sub('\W+', ' ', doc.lower()).splite()
+    else:
+        return re.sub('[^A-Za-z0-9]+', ' ', doc.lower()).splite()
+
 
 
 def token_features(tokens, feats):
@@ -115,8 +119,19 @@ def token_features(tokens, feats):
     >>> sorted(feats.items())
     [('token=hi', 2), ('token=there', 1)]
     """
-    ###TODO
-    pass
+    c = Counter()
+    for w in tokens:
+        tmp= ['token='+w]
+        #print("w is %s, tmp is %s" %(w, tmp))
+        c.update(tmp)
+        feats['token='+w] = c['token='+w]
+
+    """
+        for key in c.keys():
+        feats[key] = c[key]
+    """
+
+
 
 
 def token_pair_features(tokens, feats, k=3):
@@ -145,8 +160,21 @@ def token_pair_features(tokens, feats, k=3):
     >>> sorted(feats.items())
     [('token_pair=a__b', 1), ('token_pair=a__c', 1), ('token_pair=b__c', 2), ('token_pair=b__d', 1), ('token_pair=c__d', 1)]
     """
-    ###TODO
-    pass
+
+    ArrayLenK = []
+    tmp = []
+
+    for i in range(len(tokens) - k + 1):
+        ArrayLenK.append(tokens[i:i + k])
+
+    for Arr in ArrayLenK:
+        tmp += list(combinations(Arr, 2))
+
+    pairC = Counter(tmp)
+
+    for key in pairC.keys():
+        nKey = 'token_pair=' + key[0] + '__' + key[1]
+        feats[nKey] = pairC[key]
 
 
 neg_words = set(['bad', 'hate', 'horrible', 'worst', 'boring'])
@@ -171,8 +199,17 @@ def lexicon_features(tokens, feats):
     >>> sorted(feats.items())
     [('neg_words', 1), ('pos_words', 2)]
     """
-    ###TODO
-    pass
+    pos =0
+    neg = 0
+
+    for t in tokens:
+        t = t.lower()
+        if t in neg_words:
+            neg +=1
+        if t in pos_words:
+            pos +=1
+    feats['neg_words'] = neg
+    feats['pos_words'] = pos
 
 
 def featurize(tokens, feature_fns):
@@ -191,9 +228,13 @@ def featurize(tokens, feature_fns):
     >>> feats
     [('neg_words', 0), ('pos_words', 2), ('token=LOVE', 1), ('token=great', 1), ('token=i', 1), ('token=movie', 1), ('token=this', 1)]
     """
-    ###TODO
-    pass
+    res = []
 
+    for feature_fun in feature_fns:
+        feats = defaultdict(lambda: 0)
+        feature_fun(tokens, feats)
+        res.append(list(feats.items()))
+    return res
 
 def vectorize(tokens_list, feature_fns, min_freq, vocab=None):
     """
@@ -275,7 +316,7 @@ def eval_all_combinations(docs, labels, punct_vals,
     keep_internal_punct and min_freqs, we will enumerate all
     possible combinations of feature functions. So, if
     feature_fns = [token_features, token_pair_features, lexicon_features],
-    then we will consider all 7 combinations of features (see Log.txt
+    then we will consider all 4 combinations of features (see Log.txt
     for more examples).
 
     Params:
@@ -293,7 +334,7 @@ def eval_all_combinations(docs, labels, punct_vals,
       'punct': True or False, the setting of keep_internal_punct
       'features': The list of functions used to compute features.
       'min_freq': The setting of the min_freq parameter.
-      'accuracy': The average cross_validation accuracy for this setting, using 5 folds.
+      'accuracy': The average cross_validation accuracy for this setting.
 
       This list should be SORTED in descending order of accuracy.
 
@@ -456,9 +497,9 @@ def main():
 
     # Print top coefficients per class.
     print('\nTOP COEFFICIENTS PER CLASS:')
-    print('negative words:')
+    print('positive words:')
     print('\n'.join(['%s: %.5f' % (t,v) for t,v in top_coefs(clf, 0, 5, vocab)]))
-    print('\npositive words:')
+    print('\nnegative words:')
     print('\n'.join(['%s: %.5f' % (t,v) for t,v in top_coefs(clf, 1, 5, vocab)]))
 
     # Parse test data
