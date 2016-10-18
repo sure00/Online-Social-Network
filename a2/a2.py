@@ -323,6 +323,19 @@ def cross_validation_accuracy(clf, X, labels, k):
     Returns:
       The average testing accuracy of the classifier
       over each fold of cross-validation.
+
+    l = len(labels)
+    cv = KFold(l, k)
+    accuracies = []
+
+    #for train_ind, test_ind in cv.split(X):
+    for train_index, test_index in cv:
+        #print("X is %s, train_ind is %s, labels is %s, " % (X, train_ind, labels))
+        #print(train_ind)
+        clf.fit(X[train_index], labels[train_index])
+        predictions = clf.predict(X[test_index])
+        accuracies.append(accuracy_score(labels[test_index], predictions))
+    return np.mean(accuracies)
     """
     cv = KFold(len(labels), k)
     accuracies = []
@@ -331,7 +344,7 @@ def cross_validation_accuracy(clf, X, labels, k):
         predictions = clf.predict(X[test_ind])
         accuracies.append(accuracy_score(labels[test_ind], predictions))
     return np.mean(accuracies)
-    #return sum(accuracies)/len(accuracies)
+
     #print('Average 5-fold cross validation accuracy=%.2f (std=%.2f)' %(np.mean(accuracies), np.std(accuracies)))
 
 
@@ -373,19 +386,23 @@ def eval_all_combinations(docs, labels, punct_vals,
 
       This function will take a bit longer to run (~20s for me).
     """
-
     comfunctions=[]
+    res = []
     for i in range(len(feature_fns)):
         comfunctions+=list(combinations(feature_fns, i+1))
 
-    print("punct_vals is %d, min_freqs %d, feature_fns %d" % (len(punct_vals), len(min_freqs), len(comfunctions)))
+    #print("punct_vals is %d, min_freqs %d, feature_fns %d" % (len(punct_vals), len(min_freqs), len(comfunctions)))
     k=5
     for punct in punct_vals:
-        tokens_list = tokenize(docs, punct)
-        for comfunction in comfunctions:
+        tokens_list = [tokenize(doc,punct) for doc in docs]
+        for features in comfunctions:
             for min_freq in min_freqs:
-                X = vectorize(tokens_list, comfunction, min_freq, vocab=None)
-                cross_validation_accuracy(clf, X, labels, k)
+                X, voCab = vectorize(tokens_list, features, min_freq, vocab=None)
+                clf = LogisticRegression()
+                mean= cross_validation_accuracy(clf, X, labels, k)
+                res.append({'punct':punct, 'features':features,'min_freq': min_freq, 'accuracy': mean})
+
+    return sorted(res, key=lambda x: x['accuracy'],reverse=True)
 
 def plot_sorted_accuracies(results):
     """
@@ -393,9 +410,7 @@ def plot_sorted_accuracies(results):
     in ascending order of accuracy.
     Save to "accuracies.png".
     """
-    ###TODO
-    pass
-
+    #plot_graph(ranges, accuracy, x_axis='setting', y_axis='accuracy')
 
 def mean_accuracy_per_setting(results):
     """
