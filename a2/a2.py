@@ -130,14 +130,6 @@ def token_features(tokens, feats):
         c.update(tmp)
         feats['token='+w] = c['token='+w]
 
-    """
-        for key in c.keys():
-        feats[key] = c[key]
-    """
-
-
-
-
 def token_pair_features(tokens, feats, k=3):
     """
     Compute features indicating that two words occur near
@@ -232,13 +224,10 @@ def featurize(tokens, feature_fns):
     >>> feats
     [('neg_words', 0), ('pos_words', 2), ('token=LOVE', 1), ('token=great', 1), ('token=i', 1), ('token=movie', 1), ('token=this', 1)]
     """
-    res = []
-
+    feats = defaultdict(lambda: 0)
     for feature_fun in feature_fns:
-        feats = defaultdict(lambda: 0)
         feature_fun(tokens, feats)
-        res.append(list(feats.items()))
-    return res
+    return sorted(feats.items())
 
 def vectorize(tokens_list, feature_fns, min_freq, vocab=None):
     """
@@ -272,8 +261,41 @@ def vectorize(tokens_list, feature_fns, min_freq, vocab=None):
     >>> sorted(vocab.items(), key=lambda x: x[1])
     [('token=great', 0), ('token=horrible', 1), ('token=isn', 2), ('token=movie', 3), ('token=t', 4), ('token=this', 5)]
     """
-    ###TODO
-    pass
+    features =[]
+    c = Counter()
+
+    #generate features array
+    for tokens in tokens_list:
+        f = dict(featurize(tokens, feature_fns))
+        c.update(f.keys())
+        features.append(f)
+
+    # remove feature if the frequency is less than min_freq
+    tmp = [key for key, value in c.items() if value >=min_freq]
+    vocab = dict(zip( list(range(len(tmp))), list(sorted(tmp))))
+
+    row = []
+    col = []
+    data = []
+
+    #full fill the matrix
+    for RowIndex in range(len(features)):
+        for ColumnIndex in range(len(vocab)):
+            feature =  vocab[ColumnIndex]
+            value =features[RowIndex].get(feature)
+            if value is not None:
+                row.append(RowIndex)
+                col.append(ColumnIndex)
+                data.append(value)
+
+    row = np.array(row, dtype='int64')
+    col = np.array(col, dtype='int64')
+    data = np.array(data, dtype='int64')
+
+    return csr_matrix((data, (row, col)), shape=(len(features), len(vocab))) , dict(zip(vocab.values(), vocab.keys()))
+
+
+
 
 
 def accuracy_score(truth, predicted):
@@ -302,8 +324,15 @@ def cross_validation_accuracy(clf, X, labels, k):
       The average testing accuracy of the classifier
       over each fold of cross-validation.
     """
-    ###TODO
-    pass
+    cv = KFold(len(labels), k)
+    accuracies = []
+    for train_ind, test_ind in cv:
+        clf.fit(X[train_ind], labels[train_ind])
+        predictions = clf.predict(X[test_ind])
+        accuracies.append(accuracy_score(labels[test_ind], predictions))
+    return np.mean(accuracies)
+    #return sum(accuracies)/len(accuracies)
+    #print('Average 5-fold cross validation accuracy=%.2f (std=%.2f)' %(np.mean(accuracies), np.std(accuracies)))
 
 
 def eval_all_combinations(docs, labels, punct_vals,
@@ -344,9 +373,19 @@ def eval_all_combinations(docs, labels, punct_vals,
 
       This function will take a bit longer to run (~20s for me).
     """
-    ###TODO
-    pass
 
+    comfunctions=[]
+    for i in range(len(feature_fns)):
+        comfunctions+=list(combinations(feature_fns, i+1))
+
+    print("punct_vals is %d, min_freqs %d, feature_fns %d" % (len(punct_vals), len(min_freqs), len(comfunctions)))
+    k=5
+    for punct in punct_vals:
+        tokens_list = tokenize(docs, punct)
+        for comfunction in comfunctions:
+            for min_freq in min_freqs:
+                X = vectorize(tokens_list, comfunction, min_freq, vocab=None)
+                cross_validation_accuracy(clf, X, labels, k)
 
 def plot_sorted_accuracies(results):
     """
