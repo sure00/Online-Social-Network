@@ -126,7 +126,6 @@ def token_features(tokens, feats):
     c = Counter()
     for w in tokens:
         tmp= ['token='+w]
-        #print("w is %s, tmp is %s" %(w, tmp))
         c.update(tmp)
         feats['token='+w] = c['token='+w]
 
@@ -156,7 +155,6 @@ def token_pair_features(tokens, feats, k=3):
     >>> sorted(feats.items())
     [('token_pair=a__b', 1), ('token_pair=a__c', 1), ('token_pair=b__c', 2), ('token_pair=b__d', 1), ('token_pair=c__d', 1)]
     """
-
     ArrayLenK = []
     tmp = []
 
@@ -263,37 +261,47 @@ def vectorize(tokens_list, feature_fns, min_freq, vocab=None):
     """
     features =[]
     c = Counter()
-
+    #print("tokens_list is" ,tokens_list)
     #generate features array
     for tokens in tokens_list:
         f = dict(featurize(tokens, feature_fns))
+        #print("f is",f)
         c.update(f.keys())
         features.append(f)
+    #print(c.items())
 
     # remove feature if the frequency is less than min_freq
     tmp = [key for key, value in c.items() if value >=min_freq]
-    vocab = dict(zip( list(range(len(tmp))), list(sorted(tmp))))
+    #print("after filter with min_freq", tmp)
+    if vocab is None:
+        vocab= dict(zip(list(sorted(tmp)), list(range(len(tmp)))))
+        #vocab = dict(zip( list(range(len(tmp))), list(sorted(tmp))))
+    #else:
+        #print("vocab is none",vocab)
 
     row = []
     col = []
     data = []
 
     #full fill the matrix
+    #print("Vocab is", vocab)
+
     for RowIndex in range(len(features)):
-        for ColumnIndex in range(len(vocab)):
-            feature =  vocab[ColumnIndex]
-            value =features[RowIndex].get(feature)
-            if value is not None:
+        for featureKey in features[RowIndex].keys():
+            if featureKey in vocab.keys():
                 row.append(RowIndex)
-                col.append(ColumnIndex)
-                data.append(value)
+                #print("featureKey is ",featureKey)
+                col.append(vocab[featureKey])
+                data.append(features[RowIndex][featureKey])
+            #else:
+                #print("feature key %s not in vocab", featureKey)
+
 
     row = np.array(row, dtype='int64')
     col = np.array(col, dtype='int64')
     data = np.array(data, dtype='int64')
 
-    return csr_matrix((data, (row, col)), shape=(len(features), len(vocab))) , dict(zip(vocab.values(), vocab.keys()))
-
+    return csr_matrix((data, (row, col)), shape=(len(features), len(vocab))) , vocab
 
 def accuracy_score(truth, predicted):
     """ Compute accuracy of predictions.
@@ -477,7 +485,9 @@ def fit_best_classifier(docs, labels, best_result):
     tokens_list = [tokenize(doc,keep_internal_punct=best_result['punct']) for doc in docs]
     X, voCab = vectorize(tokens_list, best_result['features'], best_result['min_freq'])
     clf = LogisticRegression()
+    #print("coef", len(clf.coef_))
     clf.fit(X, labels)
+    print("after fit coef", len(clf.coef_))
     return clf, voCab
 
 
@@ -500,16 +510,20 @@ def top_coefs(clf, label, n, vocab):
     """
     print("coef",len(clf.coef_))
 
-    if label == 1:
-        # Get the learned coefficients for the Positive class.
-        coef = clf.coef_[2]
-    else:
+    if label == 0:
         # Get the learned coefficients for the Negative class.
         coef = clf.coef_[0]
+        print("Negative  coef is", coef)
+    else:
+        print("coef is",clf.coef_)
+        # Get the learned coefficients for the Positive class.
+        coef = np.array([ -x for x in clf.coef_[0]])
+        print("Positive coef is", coef)
+
 
     # Sort them in descending order.
     top_coef_ind = np.argsort(coef)[::-1][:n]
-    #print("vocab" , vocab)
+
     # Get the names of those features.
     dic = dict(zip(vocab.values(), vocab.keys()))
 
@@ -552,13 +566,20 @@ def parse_test_data(best_result, vocab):
                     in the test data. Each row is a document,
                     each column is a feature.
     """
+    docs, labels = read_data(os.path.join('data', 'test'))
 
+    tokens_list = [tokenize(doc,keep_internal_punct=best_result['punct']) for doc in docs]
 
+    X, Cab = vectorize(tokens_list, best_result['features'], best_result['min_freq'], vocab=vocab)
+
+    return  docs, labels, X
 
 def print_top_misclassified(test_docs, test_labels, X_test, clf, n):
     """
     Print the n testing documents that are misclassified by the
-    largest margin. By using the .predict_proba function of
+    largest margin.
+
+    By using the .predict_proba function of
     LogisticRegression <https://goo.gl/4WXbYA>, we can get the
     predicted probabilities of each class for each instance.
     We will first identify all incorrectly classified documents,
@@ -566,7 +587,6 @@ def print_top_misclassified(test_docs, test_labels, X_test, clf, n):
     for the incorrect class.
     E.g., if document i is misclassified as positive, we will
     consider the probability of the positive class when sorting.
-
     Params:
       test_docs.....List of strings, one per test document
       test_labels...Array of true testing labels
@@ -578,8 +598,46 @@ def print_top_misclassified(test_docs, test_labels, X_test, clf, n):
     Returns:
       Nothing; see Log.txt for example printed output.
     """
-    ###TODO
-    pass
+    res = []
+    #By using the .predict_proba function of LogisticRegression <https://goo.gl/4WXbYA>,
+    predPa = clf.predict_proba(X_test)
+
+    #print("test_labels",test_labels)
+    real_labels=[]
+    for i in range(len(predPa)):
+        # if it is not correct, get the probility
+        if predPa[i][0] > predPa[i][1]:
+            real_labels.append(0)
+        else:
+            real_labels.append(1)
+
+        if real_labels[i] != test_labels[i]:
+            res.append((i, predPa[i][real_labels[i]]))
+    #print("res", res)
+    re = sorted(res, key=lambda x: x[1], reverse=True)[:n]
+    for item in re:
+        #print("item is", item)
+
+        #print("truth=%d " %(real_labels[item[0]]))
+        #print("predicted=%d " % ( test_labels[item[0]]))
+        #print("proba=%f " % ( item[1]))
+        #print("%s" % ( test_docs[item[0]]))
+
+        print("truth=%d predicted=%d proba=%f \n%s" % (real_labels[item[0]], test_labels[item[0]], item[1],test_docs[item[0]]))
+
+        """
+        print("truth=%d" %(test_labels[item[0]]))
+
+        error_dict = {}
+        error_dict['filename'] = filenames[j[0]]
+        error_dict['index'] = j[0]
+        error_dict['predicted'] = predicted[j[0]]
+        error_dict['probas'] = predicted_proba[j[0]]
+        error_dict['truth'] = y_test[j[0]]
+
+truth=0 predicted=1 proba=0.993731
+I absolutely despise this film. I wanted to love it - I really wanted to. But man, oh man - they were SO off with Sara. And the father living was pretty cheesy. That's straight out of the Shirley Temple film.<br /><br />I highly recommend THE BOOK. It is amazing. In the book, Sara is honorable and decent and she does the right thing... BECAUSE IT IS RIGHT. She doesn't have a spiteful bone in her body.<br /><br />In the film, she is mean-spirited and spiteful. She does little things to get back at Miss Minchin. In the book, Sara is above such things. She DOES stand up to Miss Minchin. She tells the truth and is not cowed by her. But she does not do the stupid, spiteful things that the Sara in the film does.<br /><br />It's really rather unsettling to me that so many here say they loved the book and they love the movie. I can't help but wonder... did we read the same book? The whole point of the book was personal responsibility, behaving with honor and integrity, ALWAYS telling the truth and facing adversity with calm and integrity.<br /><br />Sara has a happy ending in the book - not the ridiculous survival of her father, but the joining with his partner who has been searching for her. In the book, she is taken in by this new father figure who loves and cares for her and Becky. And Miss Minchin is NOT a chimney sweep - that part of the film really was stupid.<br /><br />To see all this praise for this wretched film is disturbing to me. We are praising a film that glorifies petty, spiteful behavior with a few tips of the hat to kindness? Sara in the book was kind to the bone and full of integrity. I don't even recognize her in the film... she's not in it.<br /><br />Good thing Mrs. Burnett isn't alive to see this horrid thing. It's ghastly and undeserving to bear the title of her book.
+"""
 
 
 def main():
