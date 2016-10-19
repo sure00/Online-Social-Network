@@ -295,9 +295,6 @@ def vectorize(tokens_list, feature_fns, min_freq, vocab=None):
     return csr_matrix((data, (row, col)), shape=(len(features), len(vocab))) , dict(zip(vocab.values(), vocab.keys()))
 
 
-
-
-
 def accuracy_score(truth, predicted):
     """ Compute accuracy of predictions.
     DONE ALREADY
@@ -421,7 +418,8 @@ def plot_sorted_accuracies(results):
     plt.plot(list(range(len(results))), accuracyList)
     plt.xlabel('setting')
     plt.ylabel('accuracy')
-    plt.show()
+    #plt.show()
+    plt.savefig("accuracies.png")
 
 def mean_accuracy_per_setting(results):
     """
@@ -436,9 +434,26 @@ def mean_accuracy_per_setting(results):
       A list of (accuracy, setting) tuples, SORTED in
       descending order of accuracy.
     """
-
     res = []
-    res.append([(item['accuracy'], item) for item in results])
+    d = {}
+    for setting in results:
+        #setting['features']
+        featureKey='features='
+        for fun in setting['features']:
+            featureKey +=fun.__name__+' '
+
+        featureKey = featureKey.strip()
+
+        punctKey = 'punct=' + str(setting['punct'])
+        minFreqKey = 'min_freq=' + str(setting['min_freq'])
+
+        d.setdefault(featureKey, []).append(setting['accuracy'])
+        d.setdefault(punctKey, []).append(setting['accuracy'])
+        d.setdefault(minFreqKey, []).append(setting['accuracy'])
+
+    for key in d.keys():
+        res.append((np.mean(d[key]),key))
+
     return sorted(res, key=lambda x: x[0], reverse=True)
 
 
@@ -459,8 +474,11 @@ def fit_best_classifier(docs, labels, best_result):
             training data.
       vocab...The dict from feature name to column index.
     """
-    ###TODO
-    pass
+    tokens_list = [tokenize(doc,keep_internal_punct=best_result['punct']) for doc in docs]
+    X, voCab = vectorize(tokens_list, best_result['features'], best_result['min_freq'])
+    clf = LogisticRegression()
+    clf.fit(X, labels)
+    return clf, voCab
 
 
 def top_coefs(clf, label, n, vocab):
@@ -480,8 +498,34 @@ def top_coefs(clf, label, n, vocab):
       in descending order of the coefficient for the
       given class label.
     """
-    ###TODO
-    pass
+    print("coef",len(clf.coef_))
+
+    if label == 1:
+        # Get the learned coefficients for the Positive class.
+        coef = clf.coef_[2]
+    else:
+        # Get the learned coefficients for the Negative class.
+        coef = clf.coef_[0]
+
+    # Sort them in descending order.
+    top_coef_ind = np.argsort(coef)[::-1][:n]
+    #print("vocab" , vocab)
+    # Get the names of those features.
+    dic = dict(zip(vocab.values(), vocab.keys()))
+
+    top_coef_terms=[]
+    for ind in top_coef_ind:
+        top_coef_terms.append(dic[ind])
+
+    #top_coef_terms = vocab[top_coef_ind]
+    # Get the weights of those features
+    top_coef = coef[top_coef_ind]
+
+    #print('top weighted terms for positive class:')
+    #print([x for x in zip(top_coef_terms, top_coef)])
+
+    res = zip(top_coef_terms, top_coef)
+    return sorted(res, key=lambda x: x[1], reverse=True)
 
 
 def parse_test_data(best_result, vocab):
@@ -508,8 +552,7 @@ def parse_test_data(best_result, vocab):
                     in the test data. Each row is a document,
                     each column is a feature.
     """
-    ###TODO
-    pass
+
 
 
 def print_top_misclassified(test_docs, test_labels, X_test, clf, n):
