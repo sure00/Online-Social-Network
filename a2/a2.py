@@ -73,16 +73,18 @@ def tokenize(doc, keep_internal_punct=False):
     is inside of a word. E.g., in the example below, the token "isn't"
     is maintained when keep_internal_punct=True; otherwise, it is
     split into "isn" and "t" tokens.
+
     Params:
       doc....a string.
       keep_internal_punct...see above
     Returns:
       a numpy array containing the resulting tokens.
+
     >>> tokenize(" Hi there! Isn't this fun?", keep_internal_punct=False)
-    array(['hi', 'there', 'isn', 't', 'this', 'fun'],
+    array(['hi', 'there', 'isn', 't', 'this', 'fun'], 
           dtype='<U5')
     >>> tokenize("Hi there! Isn't this fun? ", keep_internal_punct=True)
-    array(['hi', 'there', "isn't", 'this', 'fun'],
+    array(['hi', 'there', "isn't", 'this', 'fun'], 
           dtype='<U5')
     """
     res = []
@@ -100,7 +102,6 @@ def tokenize(doc, keep_internal_punct=False):
         if len(word) !=0:
             res.append(word)
     return  np.array(res)
-
 
 
 def token_features(tokens, feats):
@@ -584,7 +585,7 @@ def print_top_misclassified(test_docs, test_labels, X_test, clf, n):
         #print("proba=%f " % ( item[1]))
         #print("%s" % ( test_docs[item[0]]))
 
-        print("truth=%d predicted=%d proba=%f \n%s\n" % (real_labels[item[0]], test_labels[item[0]], item[1],test_docs[item[0]]))
+        print("truth=%d predicted=%d proba=%f \n%s\n" % (test_labels[item[0]], real_labels[item[0]], item[1],test_docs[item[0]]))
 
 
 def main():
