@@ -122,9 +122,7 @@ def token_features(tokens, feats):
     """
     c = Counter()
     for w in tokens:
-        tmp= ['token='+w]
-        c.update(tmp)
-        feats['token='+w] = c['token='+w]
+        feats['token='+w] +=1
 
 def token_pair_features(tokens, feats, k=3):
     """
