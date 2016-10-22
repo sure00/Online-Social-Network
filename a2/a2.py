@@ -308,20 +308,6 @@ def cross_validation_accuracy(clf, X, labels, k):
     Returns:
       The average testing accuracy of the classifier
       over each fold of cross-validation.
-
-    l = len(labels)
-    #cv = KFold(l, k)
-    cv=KFold(n_splits=k)
-    accuracies = []
-
-    for train_ind, test_ind in cv.split(X):
-    #for train_index, test_index in cv:
-        #print("X is %s, train_ind is %s, labels is %s, " % (X, train_ind, labels))
-        #print(train_ind)
-        clf.fit(X[train_ind], labels[train_ind])
-        predictions = clf.predict(X[test_ind])
-        accuracies.append(accuracy_score(labels[test_ind], predictions))
-    return np.mean(accuracies)
     """
     cv = KFold(len(labels), k)
     accuracies = []
