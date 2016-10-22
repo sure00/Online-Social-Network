@@ -438,9 +438,8 @@ def fit_best_classifier(docs, labels, best_result):
     tokens_list = [tokenize(doc,keep_internal_punct=best_result['punct']) for doc in docs]
     X, voCab = vectorize(tokens_list, best_result['features'], best_result['min_freq'])
     clf = LogisticRegression()
-    #print("coef", len(clf.coef_))
     clf.fit(X, labels)
-    #print("after fit coef", len(clf.coef_))
+
     return clf, voCab
 
 
@@ -460,16 +459,13 @@ def top_coefs(clf, label, n, vocab):
       in descending order of the coefficient for the
       given class label.
     """
-    #print("coef",len(clf.coef_))
-
     if label == 0:
         # Get the learned coefficients for the Negative class.
         coef = np.array([-x for x in clf.coef_[0]])
-        #print("Negative  coef is", coef)
+
     else:
         # Get the learned coefficients for the Positive class.
         coef = clf.coef_[0]
-        #print("Positive coef is", coef)
 
 
     # Sort them in descending order.
@@ -482,14 +478,9 @@ def top_coefs(clf, label, n, vocab):
     for ind in top_coef_ind:
         top_coef_terms.append(dic[ind])
 
-    #top_coef_terms = vocab[top_coef_ind]
-    # Get the weights of those features
     top_coef = coef[top_coef_ind]
-
-    #print('top weighted terms for positive class:')
-    #print([x for x in zip(top_coef_terms, top_coef)])
-
     res = zip(top_coef_terms, top_coef)
+
     return sorted(res, key=lambda x: x[1], reverse=True)
 
 
@@ -545,31 +536,19 @@ def print_top_misclassified(test_docs, test_labels, X_test, clf, n):
       Nothing; see Log.txt for example printed output.
     """
     res = []
-    #By using the .predict_proba function of LogisticRegression <https://goo.gl/4WXbYA>,
+    # By using the .predict_proba function of LogisticRegression <https://goo.gl/4WXbYA>,
+    predict = clf.predict(X_test)
     predPa = clf.predict_proba(X_test)
 
-    #print("test_labels",test_labels)
-    real_labels=[]
-    for i in range(len(predPa)):
-        # if it is not correct, get the probility
-        if predPa[i][0] > predPa[i][1]:
-            real_labels.append(0)
-        else:
-            real_labels.append(1)
-
-        if real_labels[i] != test_labels[i]:
-            res.append((i, predPa[i][real_labels[i]]))
-    #print("res", res)
+    for i in range(len(predict)):
+        if predict[i] != test_labels[i]:
+            res.append((i, predPa[i][predict[i]]))
+    # print("res", res)
     re = sorted(res, key=lambda x: x[1], reverse=True)[:n]
     for item in re:
-        #print("item is", item)
+        print("truth=%d predicted=%d proba=%f \n%s\n" % (
+        test_labels[item[0]],  predict[item[0]], item[1], test_docs[item[0]]))
 
-        #print("truth=%d " %(real_labels[item[0]]))
-        #print("predicted=%d " % ( test_labels[item[0]]))
-        #print("proba=%f " % ( item[1]))
-        #print("%s" % ( test_docs[item[0]]))
-
-        print("truth=%d predicted=%d proba=%f \n%s\n" % (test_labels[item[0]], real_labels[item[0]], item[1],test_docs[item[0]]))
 
 
 def main():
