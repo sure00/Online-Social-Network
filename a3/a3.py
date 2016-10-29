@@ -51,8 +51,10 @@ def tokenize(movies):
     >>> movies['tokens'].tolist()
     [['horror', 'romance'], ['sci-fi']]
     """
-    ###TODO
-    pass
+    e = pd.Series([tokenize_string(gen) for gen in movies['genres'].tolist()])
+    movies = movies.assign(tokens=e.values)
+
+    return movies
 
 
 def featurize(movies):
