@@ -80,7 +80,7 @@ def featurize(movies):
       - The vocab, a dict from term to int. Make sure the vocab is sorted alphabetically as in a2 (e.g., {'aardvark': 0, 'boy': 1, ...})
 
     """
-    #print("featurize movies is\n",movies)
+    #print("featurize movies is\n",movies['genres'].tolist())
     uniqueTerm = Counter()
     terms = [(Counter((re.sub(r'\W+', ' ', gen).strip()).split())) for gen in movies['genres'].tolist() if gen]
     #print("each movie term status is",terms)
@@ -109,7 +109,7 @@ def featurize(movies):
         X=csr_matrix((tfidf, (row, col)), shape=(1, len(vocab)))
         #print("x is",X.toarray())
         featuresValue.append(X)
-    #print("feature value ", featuresValue)
+
 
     e = pd.Series(featuresValue)
     movies = movies.assign(features=e.values)
@@ -138,8 +138,16 @@ def cosine_sim(a, b):
       The cosine similarity, defined as: dot(a, b) / ||a|| * ||b||
       where ||a|| indicates the Euclidean norm (aka L2 norm) of vector a.
     """
-    ###TODO
-    pass
+    print("a",a.toarray)
+    print("b",b.toarray)
+
+    normA = np.sqrt((a.toarray() ** 2).sum())
+    normB = np.sqrt((b.toarray() ** 2).sum())
+
+    print("normA", normA)
+    print("normB", normB)
+
+    return 1.0* np.dot(a.toarray, b.toarray) / (normA * normB)
 
 
 def make_predictions(movies, ratings_train, ratings_test):
@@ -160,8 +168,7 @@ def make_predictions(movies, ratings_train, ratings_test):
     Returns:
       A numpy array containing one predicted rating for each element of ratings_test.
     """
-    ###TODO
-    pass
+
 
 
 def mean_absolute_error(predictions, ratings_test):
