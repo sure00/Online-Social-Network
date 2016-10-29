@@ -51,7 +51,7 @@ def tokenize(movies):
     >>> movies['tokens'].tolist()
     [['horror', 'romance'], ['sci-fi']]
     """
-    e = pd.Series([tokenize_string(gen) for gen in movies['genres'].tolist()])
+    e = pd.Series([tokenize_string(gen) for gen in movies['genres'].tolist() if gen])
     movies = movies.assign(tokens=e.values)
 
     return movies
@@ -81,13 +81,40 @@ def featurize(movies):
 
     """
     #print("featurize movies is\n",movies)
-    print("genres to list ",[gen.split('|') for gen in movies['genres'].tolist()])
+    uniqueTerm = Counter()
+    terms = [(Counter((re.sub(r'\W+', ' ', gen).strip()).split())) for gen in movies['genres'].tolist() if gen]
+    #print("each movie term status is",terms)
 
+    #number of unique documents containing term i
+    for feat in terms:
+        uniqueTerm.update(list(feat.keys()))
 
+    vocab = dict(zip(list(sorted(uniqueTerm.keys(), key=lambda s: s.lower())), list(range(len(uniqueTerm)))))
+    sorted(uniqueTerm.keys(), key=lambda s: s.lower())
 
-    #e = pd.Series([tf * idf for gen in movies['genres'].tolist()])
-    #movies = movies.assign(features=e.values)
+    #print("vocab is %s, its len is %d" %(vocab, len(vocab)))
 
+    N = movies.shape[0]
+
+    featuresValue = []
+    for feat in terms:
+        col = []
+        row = []
+        tfidf = []
+        for term in feat.keys():
+            row.append(0)
+            col.append(vocab[term])
+            tfidf.append(1.0*feat[term]/max(feat.values())* math.log10(N/uniqueTerm[term]))
+        #print("row is %s, col is %s, tfidf is %s" %(row, col, tfidf))
+        X=csr_matrix((tfidf, (row, col)), shape=(1, len(vocab)))
+        #print("x is",X.toarray())
+        featuresValue.append(X)
+    #print("feature value ", featuresValue)
+
+    e = pd.Series(featuresValue)
+    movies = movies.assign(features=e.values)
+
+    return movies, vocab
 
 
 def train_test_split(ratings):
