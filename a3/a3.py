@@ -38,14 +38,12 @@ def tokenize(movies):
     Append a new column to the movies DataFrame with header 'tokens'.
     This will contain a list of strings, one per token, extracted
     from the 'genre' field of each movie. Use the tokenize_string method above.
-
     Note: you may modify the movies parameter directly; no need to make
     a new copy.
     Params:
       movies...The movies DataFrame
     Returns:
       The movies DataFrame, augmented to include a new column called 'tokens'.
-
     >>> movies = pd.DataFrame([[123, 'Horror|Romance'], [456, 'Sci-Fi']], columns=['movieId', 'genres'])
     >>> movies = tokenize(movies)
     >>> movies['tokens'].tolist()
@@ -71,14 +69,12 @@ def featurize(movies):
     max_k tf(k, d) is the maximum frequency of any term in document d
     N is the number of documents (movies)
     df(i) is the number of unique documents containing term i
-
     Params:
       movies...The movies DataFrame
     Returns:
       A tuple containing:
       - The movies DataFrame, which has been modified to include a column named 'features'.
       - The vocab, a dict from term to int. Make sure the vocab is sorted alphabetically as in a2 (e.g., {'aardvark': 0, 'boy': 1, ...})
-
     """
     #print("featurize movies is\n",movies['genres'].tolist())
     uniqueTerm = Counter()
@@ -138,29 +134,28 @@ def cosine_sim(a, b):
       The cosine similarity, defined as: dot(a, b) / ||a|| * ||b||
       where ||a|| indicates the Euclidean norm (aka L2 norm) of vector a.
     """
-    print("a",a.toarray)
-    print("b",b.toarray)
+    #print("a",a.toarray())
+    #print("b",b.toarray())
 
     normA = np.sqrt((a.toarray() ** 2).sum())
     normB = np.sqrt((b.toarray() ** 2).sum())
 
-    print("normA", normA)
-    print("normB", normB)
+    #print("normA", normA)
+    #print("normB", normB)
 
-    return 1.0* np.dot(a.toarray, b.toarray) / (normA * normB)
+    res =  (1.0* np.dot(a.toarray()[0], b.toarray()[0]) / (normA * normB))
+    return res
 
 
 def make_predictions(movies, ratings_train, ratings_test):
     """
     Using the ratings in ratings_train, predict the ratings for each
     row in ratings_test.
-
     To predict the rating of user u for movie i: Compute the weighted average
     rating for every other movie that u has rated.  Restrict this weighted
     average to movies that have a positive cosine similarity with movie
     i. The weight for movie m corresponds to the cosine similarity between m
     and i.
-
     Params:
       movies..........The movies DataFrame.
       ratings_train...The subset of ratings used for making predictions. These are the "historical" data.
@@ -168,7 +163,34 @@ def make_predictions(movies, ratings_train, ratings_test):
     Returns:
       A numpy array containing one predicted rating for each element of ratings_test.
     """
+    #print("ratings_test is", ratings_test)
+    #print("ratings_train is", ratings_train)
+    tmp = []
+    rate = []
+    res=[]
+    for index, rowsInTest in ratings_test.iterrows():
+        #print("index is %d, rowsInTest is %s" %(index, rowsInTest))
+        #print("ratings_train\n", ratings_train)
+        ratingTestuserID = ratings_train['userId'] == rowsInTest['userId']
+        #print("userId is %d\n, resutlt is %s \n" %(rowsInTest['userId'], ratings_train[ratingTestuserID]))
+        for index, rowsinTrain in ratings_train[ratingTestuserID].iterrows():
+            TrainMoveId = movies['movieId']== rowsinTrain['movieId']
+            TestMoveId = movies['movieId']== rowsInTest['movieId']
+            #print("movies-TrainMove %s\n, movies-TestMove %s\n" %(movies[TrainMoveId],movies[TestMoveId]))
+            #print("TrainMoveID is %s \n, testMoveId is %s \n" %(movies[TrainMoveId]['features'].tolist()[0], movies[TestMoveId]['features'].tolist()[0]))
+            cosSim = cosine_sim(movies[TrainMoveId]['features'].tolist()[0], movies[TestMoveId]['features'].tolist()[0])
 
+            if cosSim > 0:
+                tmp.append(cosSim)
+            else:
+                tmp.append(0)
+            #print("rate is ",rowsinTrain['rating'])
+            rate.append(rowsinTrain['rating'])
+        if sum(tmp)==0:
+            res.append(np.mean(rate))
+        else:
+            res.append((sum(np.array(tmp) * np.array(rate))/sum(tmp)))
+    return res
 
 
 def mean_absolute_error(predictions, ratings_test):
