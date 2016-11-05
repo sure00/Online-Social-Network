@@ -78,7 +78,17 @@ def featurize(movies):
     """
     #print("featurize movies is\n",movies['genres'].tolist())
     uniqueTerm = Counter()
-    terms = [(Counter((re.sub(r'\W+', ' ', gen).strip()).split())) for gen in movies['genres'].tolist() if gen]
+    terms=[]
+
+    for gen in movies['genres'].tolist():
+        #print("gen is ", )
+        if gen  == '(no genres listed)' :
+            #print("no genres listed found")
+            terms +=[Counter(['no','genres','listed'])]
+            #print("terms %s , splite to %s" %(gen, Counter(['no','genres','listed'])))
+        else:
+            terms += [(Counter(gen.lower().split('|')))]
+            #print("terms %s, splite to %s " %(gen, Counter((gen.lower()).split('|'))))
     #print("each movie term status is",terms)
 
     #number of unique documents containing term i
@@ -86,9 +96,9 @@ def featurize(movies):
         uniqueTerm.update(list(feat.keys()))
 
     vocab = dict(zip(list(sorted(uniqueTerm.keys(), key=lambda s: s.lower())), list(range(len(uniqueTerm)))))
-    sorted(uniqueTerm.keys(), key=lambda s: s.lower())
+    #print("vocab is %s, its len is %d" %(sorted(vocab.items()), len(vocab)))
 
-    #print("vocab is %s, its len is %d" %(vocab, len(vocab)))
+    #print("count is",uniqueTerm)
 
     N = movies.shape[0]
 
@@ -144,6 +154,7 @@ def cosine_sim(a, b):
     #print("normB", normB)
 
     res =  (1.0* np.dot(a.toarray()[0], b.toarray()[0]) / (normA * normB))
+
     return res
 
 
@@ -165,10 +176,11 @@ def make_predictions(movies, ratings_train, ratings_test):
     """
     #print("ratings_test is", ratings_test)
     #print("ratings_train is", ratings_train)
-    tmp = []
-    rate = []
+
     res=[]
     for index, rowsInTest in ratings_test.iterrows():
+        tmp = []
+        rate = []
         #print("index is %d, rowsInTest is %s" %(index, rowsInTest))
         #print("ratings_train\n", ratings_train)
         ratingTestuserID = ratings_train['userId'] == rowsInTest['userId']
@@ -178,6 +190,8 @@ def make_predictions(movies, ratings_train, ratings_test):
             TestMoveId = movies['movieId']== rowsInTest['movieId']
             #print("movies-TrainMove %s\n, movies-TestMove %s\n" %(movies[TrainMoveId],movies[TestMoveId]))
             #print("TrainMoveID is %s \n, testMoveId is %s \n" %(movies[TrainMoveId]['features'].tolist()[0], movies[TestMoveId]['features'].tolist()[0]))
+            #print("a is %s\n" %movies[TrainMoveId]['features'].tolist())
+            #print("b is %s\n" %movies[TestMoveId]['features'].tolist())
             cosSim = cosine_sim(movies[TrainMoveId]['features'].tolist()[0], movies[TestMoveId]['features'].tolist()[0])
 
             if cosSim > 0:
