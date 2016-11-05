@@ -144,14 +144,8 @@ def cosine_sim(a, b):
       The cosine similarity, defined as: dot(a, b) / ||a|| * ||b||
       where ||a|| indicates the Euclidean norm (aka L2 norm) of vector a.
     """
-    #print("a",a.toarray())
-    #print("b",b.toarray())
-
     normA = np.sqrt((a.toarray() ** 2).sum())
     normB = np.sqrt((b.toarray() ** 2).sum())
-
-    #print("normA", normA)
-    #print("normB", normB)
 
     res =  (1.0* np.dot(a.toarray()[0], b.toarray()[0]) / (normA * normB))
 
@@ -174,17 +168,13 @@ def make_predictions(movies, ratings_train, ratings_test):
     Returns:
       A numpy array containing one predicted rating for each element of ratings_test.
     """
-    #print("ratings_test is", ratings_test)
-    #print("ratings_train is", ratings_train)
-
     res=[]
     for index, rowsInTest in ratings_test.iterrows():
         tmp = []
         rate = []
-        #print("index is %d, rowsInTest is %s" %(index, rowsInTest))
-        #print("ratings_train\n", ratings_train)
+
         ratingTestuserID = ratings_train['userId'] == rowsInTest['userId']
-        #print("userId is %d\n, resutlt is %s \n" %(rowsInTest['userId'], ratings_train[ratingTestuserID]))
+
         for index, rowsinTrain in ratings_train[ratingTestuserID].iterrows():
             TrainMoveId = movies['movieId']== rowsinTrain['movieId']
             TestMoveId = movies['movieId']== rowsInTest['movieId']
