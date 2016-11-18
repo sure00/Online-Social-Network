@@ -4,39 +4,16 @@
 collect.py
 """
 
-import re
-from sklearn.cross_validation import KFold
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import LinearSVC
-from sklearn.metrics import accuracy_score
-import hashlib
-import numpy as np
-import csv
 from datetime import *
-from collections import Counter
-import matplotlib.pyplot as plt
-import pandas as pd
-from pandas.tools.plotting import scatter_matrix
 import pickle
-from sklearn import neighbors
-from zipfile import ZipFile
-from sklearn import svm
-from pylab import *
-from scipy.sparse import csr_matrix
 from TwitterAPI import TwitterAPI
-from collections import Counter
-import networkx as nx
 import io
 import sys, os
-import time
-import pickle
 
 consumer_key = 'EqritIkuIQDEFtC8X0tHKCSAw'
 consumer_secret = 'XoUbK9DXQpyI9X923fi2cGvQ1pABONUHXVKETmPCpMlc0aebcH'
 access_token = '769354220537602048-lt18gDc963UdQGJinrfIYD8pwkmaiHT'
 access_token_secret = 'ze4ACglFMf5dYfgdL3LUUepgBymJJbu3OCjjN5AvcZpFG'
-
 
 def get_twitter():
     """ Construct an instance of TwitterAPI using the tokens you entered above.
