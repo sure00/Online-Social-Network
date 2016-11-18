@@ -1,3 +1,5 @@
+
+
 """
 collect.py
 """
@@ -28,7 +30,7 @@ import networkx as nx
 import io
 import sys, os
 import time
-from urllib.parse  import urlparse
+import pickle
 
 consumer_key = 'EqritIkuIQDEFtC8X0tHKCSAw'
 consumer_secret = 'XoUbK9DXQpyI9X923fi2cGvQ1pABONUHXVKETmPCpMlc0aebcH'
@@ -66,40 +68,55 @@ def robust_request(twitter, resource, params, max_tries=5):
             time.sleep(61 * 15)
 
 
-
 def getData(twitter):
-    request = robust_request(twitter,'search/tweets', {'q': "Prop64", 'count': 5000})
+    #base on one hundreds
+    limit=5
+    tweets = []
+    # Fetching tweets which talking about trump
+    f= open('tweetsData.txt', 'wb+')
 
+    for request in robust_request(twitter, 'statuses/filter', {'track': "Donald Trump"}):
+    #for request in twitter.request('statuses/filter', {'track': "Donald Trump"}):
+        #print(request.keys())
+        tweets.append(request)
+        if len(tweets) % 100 == 0:
+            print('found %d tweets' % len(tweets))
+        if len(tweets) >= 100*limit:
+                break
 
+    #print("before dump",tweets)
+    pickle.dump(tweets,f)
+    print(tweets[-1])
+    f.close()
 
-    #tweets = twitter.request('search/tweets', {'q': "Prop64", 'count': 5000})
-    print(request.get_rest_quota())
-    obj = request.json()
-    print("obj is",obj)
+    #Debug log
+    #f = open('tweetsData.txt', 'rb')
+    #out = pickle.load(f)
+    #print("after loading")
+    #print(out[-1])
+    #print(len(out))
+    '''
+    # Fetching tweets which talking about trump
 
-    k = 1
-    while (len(request.text) > 0):
-            obj = request.json();
-            #print("obj is", obj)
-            refresh_url = obj["search_metadata"]["refresh_url"]
-            max_id_str = obj["search_metadata"]["max_id_str"]
-            since_id_str = obj["search_metadata"]["since_id_str"]
-            query = urlparse(refresh_url).query.split("&");
-            print("since_id is",query[0].split("=")[1],query[1].split("=")[1])
-            lastKey = query[0].split("=")[1]
-            print("lastKey Added ", lastKey)
-            #appendData(obj['statuses'])
-            print(obj['statuses'])
-            print("no of tweets", len(obj['statuses']))
-            if len(obj['statuses']) == 0:
-                #print("sleeping ofr 15 minutes at", str(datetime.now()))
-                time.sleep(61 * 15)
-            else:
-                tweets = twitter.request('search/tweets', {'q': query[1].split("=")[1], 'include_entities': 1,
-                                                       'since_id': query[0].split("=")[1], 'count': 5000})
-            k = k + 1
-            if k >= 15:
-                break;
+    tweets = []
+    totalTweets = 0
+
+    for request in robust_request(twitter, 'statuses/filter', {'track': "Donald Trump"}):
+        tweets.append(request)
+        if len(tweets) % 100 == 0:
+            saveData(tweets)
+            tweets = []
+            totalTweets+=100
+            print('found %d tweets' % totalTweets)
+        if totalTweets >= 100*limit:
+                break
+    #print(tweets[0])
+    f = open('tweetsData.txt', 'rb')
+
+    out = pickle.load(f)
+    print("after loading")
+    print(len(out))
+    '''
 
 if __name__ == '__main__':
     twitter = get_twitter()
