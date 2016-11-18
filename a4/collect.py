@@ -67,57 +67,40 @@ def robust_request(twitter, resource, params, max_tries=5):
             sys.stderr.flush()
             time.sleep(61 * 15)
 
+# append to database
+def saveData(twitters):
+    """ save the collect data to tweetsData.txt.
+    Args:
+      twitters .... Collect data from twitter.
+    Returns:
+      NULL
+    """
+    f = open('tweetsData.txt', 'wb+')
+    pickle.dump(twitters, f)
+    f.close()
+    print("Data had saved to tweetsData.txt")
 
-def getData(twitter):
+def getData(twitter,limit):
+    """ Get the twitter data with stream API.
+    Args:
+      twitter .... A TwitterAPI object.
+      limit ... Total twitters that collected
+    Returns:
+      A TwitterResponse array which collect all the twitters
+    """
+
     #base on one hundreds
-    limit=5
     tweets = []
-    # Fetching tweets which talking about trump
-    f= open('tweetsData.txt', 'wb+')
 
+    # Fetching tweets with stream api
     for request in robust_request(twitter, 'statuses/filter', {'track': "Donald Trump"}):
-    #for request in twitter.request('statuses/filter', {'track': "Donald Trump"}):
-        #print(request.keys())
         tweets.append(request)
         if len(tweets) % 100 == 0:
             print('found %d tweets' % len(tweets))
         if len(tweets) >= 100*limit:
-                break
-
-    #print("before dump",tweets)
-    pickle.dump(tweets,f)
-    print(tweets[-1])
-    f.close()
-
-    #Debug log
-    #f = open('tweetsData.txt', 'rb')
-    #out = pickle.load(f)
-    #print("after loading")
-    #print(out[-1])
-    #print(len(out))
-    '''
-    # Fetching tweets which talking about trump
-
-    tweets = []
-    totalTweets = 0
-
-    for request in robust_request(twitter, 'statuses/filter', {'track': "Donald Trump"}):
-        tweets.append(request)
-        if len(tweets) % 100 == 0:
-            saveData(tweets)
-            tweets = []
-            totalTweets+=100
-            print('found %d tweets' % totalTweets)
-        if totalTweets >= 100*limit:
-                break
-    #print(tweets[0])
-    f = open('tweetsData.txt', 'rb')
-
-    out = pickle.load(f)
-    print("after loading")
-    print(len(out))
-    '''
+                return  tweets
 
 if __name__ == '__main__':
     twitter = get_twitter()
-    getData(twitter)
+    twitters = getData(twitter, limit=5)
+    saveData(twitters)
