@@ -68,15 +68,19 @@ def robust_request(twitter, resource, params, max_tries=5):
             time.sleep(61 * 15)
 
 # append to database
-def saveData(twitters):
+def saveData(tweets):
     """ save the collect data to tweetsData.txt.
     Args:
       twitters .... Collect data from twitter.
     Returns:
       NULL
     """
+
     f = open('tweetsData.txt', 'wb+')
-    pickle.dump(twitters, f)
+    tweets = [t for t in tweets if 'user' in t]
+    print('fetched %d tweets' % len(tweets))
+
+    pickle.dump(tweets, f)
     f.close()
     print("Data had saved to tweetsData.txt")
 
@@ -102,5 +106,5 @@ def getData(twitter,limit):
 
 if __name__ == '__main__':
     twitter = get_twitter()
-    twitters = getData(twitter, limit=5)
+    twitters = getData(twitter, limit=10)
     saveData(twitters)
