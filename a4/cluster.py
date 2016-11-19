@@ -126,7 +126,7 @@ def odds_ratios(male_probs, female_probs):
                  ])
 
 if __name__ == '__main__':
-    filename = 'tweetsData.txt'
+    filename = 'tweetsData.pkl'
     tweets = loadData(filename)
     gender_by_name(tweets)
     #print_genders(tweets)
