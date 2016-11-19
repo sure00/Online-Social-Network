@@ -53,8 +53,7 @@ def saveData(tweets):
     Returns:
       NULL
     """
-
-    f = open('tweetsData.txt', 'wb+')
+    f = open('tweetsData.pkl', 'wb+')
     tweets = [t for t in tweets if 'user' in t]
     print('fetched %d tweets' % len(tweets))
 
