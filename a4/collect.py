@@ -83,5 +83,6 @@ def getData(twitter,limit):
 
 if __name__ == '__main__':
     twitter = get_twitter()
-    twitters = getData(twitter, limit=10)
+    twitters = getData(twitter, limit=15)
+    
     saveData(twitters)
