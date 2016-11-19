@@ -4,11 +4,12 @@
 collect.py
 """
 
-from datetime import *
+import datetime
 import pickle
 from TwitterAPI import TwitterAPI
 import io
 import sys, os
+import time
 
 consumer_key = 'EqritIkuIQDEFtC8X0tHKCSAw'
 consumer_secret = 'XoUbK9DXQpyI9X923fi2cGvQ1pABONUHXVKETmPCpMlc0aebcH'
@@ -81,8 +82,44 @@ def getData(twitter,limit):
         if len(tweets) >= 100*limit:
                 return  tweets
 
+def get_friends(twitter, screen_name):
+    """ Return a list of Twitter IDs for users that this person follows, up to 5000.
+    See https://dev.twitter.com/rest/reference/get/friends/ids
+    Note, because of rate limits, it's best to test this method for one candidate before trying
+    on all candidates.
+    Args:
+        twitter.......The TwitterAPI object
+        screen_name... a string of a Twitter screen name
+    Returns:
+        A list of ints, one per friend ID, sorted in ascending order.
+    >>> twitter = get_twitter()
+    >>> get_friends(twitter, 'aronwc')[:5]
+    [695023, 1697081, 8381682, 10204352, 11669522]
+    """
+    print("screen name is", screen_name)
+    respond  = robust_request(twitter, 'friends/ids', {'screen_name': screen_name}, 5 )
+    friends  = [r for r in respond]
+
+    friends.sort()
+    #print(friends)
+    return (friends)
+
+def expandNetWork(twitter, twitters):
+    '''Base on the twitter data to expand the network for using detect community algorithm to find the community.
+    Args:
+        twitters... A list of tweets
+
+    Return:
+         A new list of tweets which can construct a network
+    '''
+    for t in twitters:
+        t['user']["friends"] = get_friends(twitter, t['user']["screen_name"])
+
+
 if __name__ == '__main__':
     twitter = get_twitter()
-    twitters = getData(twitter, limit=15)
-    
+    twitters = getData(twitter, limit=1)
+    print("Changing from streaming request to REST at %s " %(str(datetime.datetime.now())))
+    time.sleep(61 * 15)
+    expandNetWork(twitter, twitters)
     saveData(twitters)
