@@ -36,32 +36,22 @@ def example_graph():
     return g
 
 def constructGraph(tweets):
+    """ Construct the Graph with tweets user id and his friends.
+
+    Args:
+    tweets: origial tweets data from tweets data
+
+    Returns:
+    return graph
+    """
+
     g = nx.Graph()
     for t in tweets:
         g.add_edges_from([(t['user']['id'], friend) for friend in t['user']['friends']])
     return g
 
-
-def main():
-    """
-    FYI: This takes ~10-15 seconds to run on my laptop.
-    """
-    tweetFile = 'tweetsData.txt'
-    tweets = loadData(tweetFile)
-    graph = constructGraph(tweets)
-
-
-    total = 0
-    for t in tweets:
-        #print("tweet id is %d, friends total have %d" %(t['user']['id'],len(t['user']['friends'])))
-        total +=len(t['user']['friends'])
-
-    print("total edge is", total)
-    print('graph has %s nodes and %s edges' % (len(graph.nodes()), len(graph.edges())))
-
-
+def friend_overlap(tweets):
     list =[]
-
     for i in range(len(tweets)):
         for j in range(i+1,len(tweets)):
 
@@ -71,6 +61,69 @@ def main():
     list = sorted(list , key=lambda  x:-x[2])
 
     print("list is", list)
+
+
+def find_best_edge(G0):
+    eb = nx.edge_betweenness_centrality(G0)
+    # eb is dict of (edge, score) pairs, where higher is better
+    # Return the edge with the highest score.
+    return sorted(eb.items(), key=lambda x: x[1], reverse=True)[0][0]
+
+def girvan_newman(G, depth=0):
+    """ Recursive implementation of the girvan_newman algorithm.
+    See http://www-rohan.sdsu.edu/~gawron/python_for_ss/course_core/book_draft/Social_Networks/Networkx.html
+
+    Args:
+    G.....a networkx graph
+
+    Returns:
+    A list of all discovered communities,
+    a list of lists of nodes. """
+
+    if G.order() == 1:
+        return [G.nodes()]
+
+    # Each component is a separate community. We cluster each of these.
+    components = [c for c in nx.connected_component_subgraphs(G)]
+    indent = '   ' * depth  # for printing
+    while len(components) == 1:
+        edge_to_remove = find_best_edge(G)
+        print(indent + 'removing ' + str(edge_to_remove))
+        G.remove_edge(*edge_to_remove)
+        components = [c for c in nx.connected_component_subgraphs(G)]
+
+    print("len of compoents is", len(components))
+    for c in components:
+        print("components have %s nodes" %(str(c.nodes())))
+
+    #result = [c.nodes() for c in components]
+    #print(indent + 'components=' + str(result))
+    #for c in components:
+        #result.extend(girvan_newman(c, depth + 1))
+
+    #return result
+
+
+def main():
+    """
+    FYI: This takes ~10-15 seconds to run on my laptop.
+    """
+    tweetFile = 'tweetsData.pkl'
+    tweets = loadData(tweetFile)
+    graph = constructGraph(tweets)
+
+
+    total = 0
+    for t in tweets:
+        #print("tweet id is %d, friends total have %d" %(t['user']['id'],len(t['user']['friends'])))
+        total +=len(t['user']['friends'])
+
+
+    print("total edge is", total)
+    print('graph has %s nodes and %s edges' % (len(graph.nodes()), len(graph.edges())))
+    friend_overlap(tweets)
+
+    girvan_newman(graph)
 
     """
     graph = read_graph()

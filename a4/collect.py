@@ -16,7 +16,7 @@ consumer_secret = 'XoUbK9DXQpyI9X923fi2cGvQ1pABONUHXVKETmPCpMlc0aebcH'
 access_token = '769354220537602048-lt18gDc963UdQGJinrfIYD8pwkmaiHT'
 access_token_secret = 'ze4ACglFMf5dYfgdL3LUUepgBymJJbu3OCjjN5AvcZpFG'
 
-searchKey='Trump'
+searchKey='realDonaldTrum'
 savedFile = 'tweetsData.pkl'
 
 def get_twitter():
@@ -62,7 +62,7 @@ def saveData(tweets):
 
     pickle.dump(tweets, f)
     f.close()
-    print("Data had saved to tweetsData.txt")
+    print("Data had saved to %s" %savedFile)
 
 def getData(twitter,limit):
     """ Get the twitter data with stream API.
@@ -81,7 +81,7 @@ def getData(twitter,limit):
         tweets.append(request)
         #if len(tweets) % 100 == 0:
         if len(tweets) % 30 == 0:
-            print('found %d tweets' % len(tweets))
+            print('found %d tweets talk about %s' %(len(tweets),searchKey))
         #if len(tweets) >= 100*limit:
         if len(tweets) >= 30 * limit:
                 return  tweets
@@ -124,7 +124,7 @@ def filterFriends(twitter, friends):
             filtedList.append(f)
             #print(fInfo)
 
-    print("After Filter, there are %d friends have tweet contain Trump", len(filtedList))
+    print("After Filter, there are %d friends have tweet contain Trump"%len(filtedList))
 
     return filtedList
 
@@ -143,9 +143,9 @@ def get_friends(twitter, screen_name):
     >>> get_friends(twitter, 'aronwc')[:5]
     [695023, 1697081, 8381682, 10204352, 11669522]
     """
-    print("screen name is", screen_name)
+    print("Twitter user screen name is", screen_name)
     respond  = robust_request(twitter, 'friends/ids', {'screen_name': screen_name}, 5 )
-    friends  = [r for r in respond]
+    friends  = [r for r in respond][:100]
 
     filtedFriends=filterFriends(twitter, friends)
 
@@ -164,11 +164,11 @@ def expandNetWork(twitter, twitters):
     for t in twitters:
         t['user']["friends"] = get_friends(twitter, t['user']["screen_name"])
 
-
 if __name__ == '__main__':
     twitter = get_twitter()
     twitters = getData(twitter, limit=1)
     #print("Changing from streaming request to REST at %s " %(str(datetime.datetime.now())))
     #time.sleep(61 * 15)
     expandNetWork(twitter, twitters)
+
     saveData(twitters)
