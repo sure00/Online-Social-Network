@@ -1,92 +1,12 @@
-"""
-cluster.py
-"""
+# You should not use any imports not listed here:
+from collections import Counter, defaultdict, deque
+import copy
+import math
+import networkx as nx
+import urllib.request
+import os
 import pickle
-from TwitterAPI import TwitterAPI
-import sys, os
-import requests
-from pprint import pprint
-from collections import Counter
-import re
-
-def genderList():
-    males_url = 'http://www2.census.gov/topics/genealogy/' + \
-                '1990surnames/dist.male.first'
-    females_url = 'http://www2.census.gov/topics/genealogy/' + \
-                  '1990surnames/dist.female.first'
-
-    males = requests.get(males_url).text.split('\n')
-    females = requests.get(females_url).text.split('\n')
-
-    males_pct = get_percents(males)
-    females_pct = get_percents(females)
-
-    male_names = set([m.split()[0].lower() for m in males if m])
-    female_names = set([f.split()[0].lower() for f in females if f])
-
-    male_names = set([m for m in male_names if m not in female_names or
-                      males_pct[m] > females_pct[m]])
-    female_names= set([f for f in female_names if f not in male_names or
-                       females_pct[f]>males_pct[f]])
-
-
-
-
-
-    #print('%d male and %d female names' % (len(male_names), len(female_names)))
-    #print('males:\n' + '\n'.join(list(male_names)[:10]))
-    #print('\nfemales:\n' + '\n'.join(list(female_names)[:10]))
-
-    return male_names, female_names
-
-def print_ambiguous_name(male_names, female_names):
-    ambiguous = [n for n in male_names if n in female_names]
-    print('found %d ambiguous names:\n'% len(ambiguous))
-    print('\n'.join(ambiguous[:20]))
-
-def get_percents(name_list):
-    return dict([(n.split()[0].lower(), float(n.split()[1])) for n in name_list if n])
-
-
-def print_genders(tweets):
-    counts = Counter(t['gender'] for t in tweets)
-    print('%.2f of accounts are labeled with gender' %
-          ((counts['male'] + counts['female']) / sum(counts.values())))
-    print('gender counts:\n', counts)
-    for t in tweets[:20]:
-        print(t['gender'], t['user']['name'])
-
-
-
-def gender_by_name(tweets):
-    #get male and female name from Census
-    male_names, female_names = genderList()
-
-    for t in tweets:
-        name = t['user']['name']
-        t['gender'] = 'unknown'
-        if name:
-            #remove punctuation
-            name_parts=re.findall('\w+',name.split()[0].lower())
-            #print("name_parts is", name_parts)
-            if len(name_parts) > 0:
-                firstName = name_parts[0].lower()
-                if firstName in male_names:
-                    t['gender']='male'
-                    #print("first name %s is male" %firstName)
-                elif firstName in female_names:
-                    t['gender']='female'
-                    #print("first name %s is female" % firstName)
-                else:
-                    t['gender']='unknown'
-                    #print("first name %s is unknow" % firstName)
-
-    print_ambiguous_name(male_names, female_names)
-
-    #print("tweets is", tweets)
-    #for t in tweets:
-    #    print("final first name %s , gender is %s" %(t['user']['name'],t['gender']))
-    #    #print("final first name %s " %(t['user']['name']))
+import matplotlib.pyplot as plt
 
 def loadData(filename):
     # The protocol version used is detected automatically, so we do not
@@ -106,82 +26,85 @@ def loadData(filename):
     print(len(tweets))
     return tweets
 
-def counts_to_probs(gender_words):
-    '''
-    Compute probability of each term according to the frequency in a gender
-    :param gender_words:
-    :return:
-    '''
-    total = sum(gender_words.values())
-    return dict([(word, count/total)
-                 for word, count in gender_words.items()])
+def example_graph():
+    """
+    Create the example graph from class. Used for testing.
+    Do not modify.
+    """
+    g = nx.Graph()
+    g.add_edges_from([('A', 'B'), ('A', 'C'), ('B', 'C'), ('B', 'D'), ('D', 'E'), ('D', 'F'), ('D', 'G'), ('E', 'F'), ('G', 'F')])
+    return g
 
-def tokenize(s):
-    return re.sub('\W+', ' ', s).lower().split() if s else []
+def constructGraph(tweets):
+    g = nx.Graph()
+    for t in tweets:
+        g.add_edges_from([(t['user']['id'], friend) for friend in t['user']['friends']])
+    return g
 
-def odds_ratios(male_probs, female_probs):
-    return dict([(w, female_probs[w]/male_probs[w])
-                 for w in
-                 set(male_probs.keys()) | set(female_probs.keys())
-                 ])
 
+def main():
+    """
+    FYI: This takes ~10-15 seconds to run on my laptop.
+    """
+    tweetFile = 'tweetsData.txt'
+    tweets = loadData(tweetFile)
+    graph = constructGraph(tweets)
+
+
+    total = 0
+    for t in tweets:
+        #print("tweet id is %d, friends total have %d" %(t['user']['id'],len(t['user']['friends'])))
+        total +=len(t['user']['friends'])
+
+    print("total edge is", total)
+    print('graph has %s nodes and %s edges' % (len(graph.nodes()), len(graph.edges())))
+
+
+    list =[]
+
+    for i in range(len(tweets)):
+        for j in range(i+1,len(tweets)):
+
+            list.append((tweets[i]['user']['id'], tweets[j]['user']['id'],
+                         len(set(tweets[i]['user']['friends']) & set(tweets[j]['user']['friends']))))
+            #print(set(users[i]['friends']) & set(users[j]['friends']))
+    list = sorted(list , key=lambda  x:-x[2])
+
+    print("list is", list)
+
+    """
+    graph = read_graph()
+    print('graph has %d nodes and %d edges' %
+          (graph.order(), graph.number_of_edges()))
+
+    subgraph = get_subgraph(graph, 2)
+    print('subgraph has %d nodes and %d edges' %
+          (subgraph.order(), subgraph.number_of_edges()))
+    print('norm_cut scores by max_depth:')
+    print(score_max_depths(subgraph, range(1,5)))
+    clusters = partition_girvan_newman(subgraph, 3)
+    print('first partition: cluster 1 has %d nodes and cluster 2 has %d nodes' %
+          (clusters[0].order(), clusters[1].order()))
+    print('cluster 2 nodes:')
+    print(clusters[1].nodes())
+
+    test_node = 'Bill Gates'
+    train_graph = make_training_graph(subgraph, test_node, 5)
+    print('train_graph has %d nodes and %d edges' %
+          (train_graph.order(), train_graph.number_of_edges()))
+
+
+    jaccard_scores = jaccard(train_graph, test_node, 5)
+    print('\ntop jaccard scores for Bill Gates:')
+    print(jaccard_scores)
+    print('jaccard accuracy=%g' %
+          evaluate([x[0] for x in jaccard_scores], subgraph))
+
+    path_scores = path_score(train_graph, test_node, k=5, beta=.1)
+    print('\ntop path scores for Bill Gates for beta=.1:')
+    print(path_scores)
+    print('path accuracy for beta .1=%g' %
+          evaluate([x[0] for x in path_scores], subgraph))
+    """
 if __name__ == '__main__':
-    filename = 'tweetsData.pkl'
-    tweets = loadData(filename)
-    gender_by_name(tweets)
-    #print_genders(tweets)
-
-    #male_profiles = [t['user']['description'] for t in tweets
-                     #if t['gender'] == 'male']
-    #female_profiles = [t['user']['description'] for t in tweets
-                       #if t['gender'] == 'female']
-
-    male_profiles = [t['text'] for t in tweets
-    if t['gender'] == 'male']
-    female_profiles = [t['text'] for t in tweets
-    if t['gender'] == 'female']
-
-    print("male profiles is", male_profiles)
-    print("female profiles is", female_profiles)
-
-    male_words = Counter()
-    female_words = Counter()
-
-    for p in male_profiles:
-        male_words.update(Counter(tokenize(p)))
-
-    for p in female_profiles:
-        female_words.update(Counter(tokenize(p)))
-
-    diff_counts = dict([(w, female_words[w] - male_words[w])
-                        for w in
-                        set(female_words.keys() | set(male_words.keys()))
-                        ])
-    sorted_diffs = sorted(diff_counts.items(), key=lambda  x:x[1])
-
-    male_probs = counts_to_probs(male_words)
-    female_probs = counts_to_probs(female_words)
-
-    print('p(w|male)')
-    pprint(sorted(male_probs.items(), key=lambda x: -x[1])[:10])
-
-    print('\np(w|female)')
-    pprint(sorted(female_probs.items(), key=lambda x: -x[1])[:10])
-
-    #additive smoothing, Add count of 1 for all workds
-    all_words=set(male_words) | set(female_words)
-    male_words.update(all_words)
-    female_words.update(all_words)
-
-    male_probs = counts_to_probs(male_words)
-    female_probs = counts_to_probs(female_words)
-
-    ors = odds_ratios(male_probs, female_probs)
-
-    sorted_ors = sorted(ors.items(), key=lambda x: -x[1])
-
-    print('Top Female Terms (OR):')
-    pprint(sorted_ors[:20])
-
-    print('\nTop Male Terms (OR):')
-    pprint(sorted_ors[-20:])
+    main()
