@@ -9,9 +9,14 @@ import pickle
 import matplotlib.pyplot as plt
 
 def loadData(filename):
-    # The protocol version used is detected automatically, so we do not
-    # have to specify it.
+    """ Load twittes which collected in collect period
 
+    Args:
+    None
+
+    Returns:
+    return twittes
+    """
     if not os.path.isfile(filename):
         print("File %s do not exist, return derectly" %filename)
         return
@@ -25,15 +30,6 @@ def loadData(filename):
 
     print(len(tweets))
     return tweets
-
-def example_graph():
-    """
-    Create the example graph from class. Used for testing.
-    Do not modify.
-    """
-    g = nx.Graph()
-    g.add_edges_from([('A', 'B'), ('A', 'C'), ('B', 'C'), ('B', 'D'), ('D', 'E'), ('D', 'F'), ('D', 'G'), ('E', 'F'), ('G', 'F')])
-    return g
 
 def constructGraph(tweets):
     """ Construct the Graph with tweets user id and his friends.
