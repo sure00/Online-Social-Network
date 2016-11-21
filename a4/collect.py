@@ -156,8 +156,7 @@ def get_friends(twitter, screen_name):
     friends  = [r for r in respond][:200]
 
     filtedFriends, friendsTwitts =filterFriends(twitter, friends)
-    print("After Filter, %s have %d friends have tweet contain Trump"%(screen_name,len(filtedFriends)))
-
+    print(" %s have %d friends have tweets contain Trump"%(screen_name,len(filtedFriends)))
 
     filtedFriends.sort()
     #print(friends)
@@ -176,12 +175,12 @@ def findFriendstweets(twitter, twitters):
         t['user']["friends"], friendsTwitts = get_friends(twitter, t['user']["screen_name"])
         #print("user %s tweets is%s" %(t['user']["screen_name"], t))
         #print("friends ", friendsTwitts)
-    friendsTwitts.append(friendsTwitts)
+    friendsTwitts.extend(friendsTwitts)
     return friendsTwitts
 
 if __name__ == '__main__':
     twitter = get_twitter()
-    twitters = getData(twitter, limit=1)
+    twitters = getData(twitter, limit=3)
     #print("Changing from streaming request to REST at %s " %(str(datetime.datetime.now())))
     #time.sleep(61 * 15)
     friendsTwitts = findFriendstweets(twitter, twitters)

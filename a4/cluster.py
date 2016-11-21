@@ -89,15 +89,35 @@ def girvan_newman(G, depth=0):
         components = [c for c in nx.connected_component_subgraphs(G)]
 
     print("len of compoents is", len(components))
-    for c in components:
-        print("components have %s nodes" %(str(c.nodes())))
 
+    return components
     #result = [c.nodes() for c in components]
     #print(indent + 'components=' + str(result))
     #for c in components:
         #result.extend(girvan_newman(c, depth + 1))
 
     #return result
+
+def draw_network(graph,  filename):
+    """
+    Draw the network to a file. Only label the candidate nodes; the friend
+    nodes should have no labels (to reduce clutter).
+    Methods you'll need include networkx.draw_networkx, plt.figure, and plt.savefig.
+    Your figure does not have to look exactly the same as mine, but try to
+    make it look presentable.
+    """
+
+
+    custom_node_sizes = {}
+
+    #print("tweets is ", tweets)
+    #for tweet in tweets:
+        #custom_labels[tweet['user']['screen_name']] = tweet['user']['screen_name']
+
+    #nx.draw(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c')
+    nx.draw_networkx(graph, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c',pos=nx.spring_layout(graph))
+    plt.savefig('Image/'+filename)
+    #plt.show()
 
 
 def main():
@@ -107,7 +127,6 @@ def main():
     tweetFile = 'tweetsData.pkl'
     tweets = loadData(tweetFile)
     graph = constructGraph(tweets)
-
 
     total = 0
     for t in tweets:
@@ -119,7 +138,16 @@ def main():
     print('graph has %s nodes and %s edges' % (len(graph.nodes()), len(graph.edges())))
     friend_overlap(tweets)
 
-    girvan_newman(graph)
+    components = girvan_newman(graph)
+
+    for i, c in enumerate(components):
+        print("components have %s nodes" % (str(c.nodes())))
+        draw_network(c, 'copmonent'+str(i)+'.png')
+
+    #draw_network(graph, users, 'network.png')
+
+    draw_network(graph, 'network.png')
+    print('network drawn to network.png')
 
     """
     graph = read_graph()

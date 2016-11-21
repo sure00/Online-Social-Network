@@ -14,6 +14,8 @@ import numpy as np
 from sklearn.cross_validation import KFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix
+import os
+import pickle
 
 
 twittesFile = 'tweetsData.pkl'
@@ -55,9 +57,32 @@ def get_twitter(filename):
     return tweets
 
 
+def tokenize(string, lowercase, keep_punctuation, prefix,
+             collapse_urls, collapse_mentions):
+
+    """ split a tweet into tokens. """
+    if not string:
+        return []
+    if lowercase:
+        string = string.lower()
+
+    tokens=[]
+    if collapse_urls:
+        string = re.sub('http\S+', 'THIS_IS_A_URL', string)
+    if collapse_mentions:
+        string = re.sub('@\S+', 'THIS_IS_A_MENTION', string)
+    if keep_punctuation:
+        tokens=string.split()
+    else:
+        tokens=re.sub('\W+', ' ', string).split()
+    if prefix:
+        tokens=['%s%s' % (prefix, t) for t in tokens]
+    return tokens
+
 def tweet2tokens(tweet, use_descr=True, lowercase=True,
                  keep_punctuation=True, descr_prefix='d=',
                  collapse_urls=True, collapse_mentions=True):
+    print("tweet obj is ", tweet)
     tokens = tokenize(tweet['text'], lowercase, keep_punctuation, None,
                       collapse_urls, collapse_mentions)
 
@@ -76,7 +101,7 @@ def make_vocabulary(tokens_list):
     return vocabulary
 
 
-def make_feature_matrix(tokens_list, vocabulary):
+def make_feature_matrix(tweets, tokens_list, vocabulary):
     X=lil_matrix((len(tweets), len(vocabulary)))
     for i, tokens in enumerate(tokens_list):
         for token in tokens:
@@ -109,12 +134,20 @@ def do_cross_val(X, y, nfolds):
 def main():
     male_names, female_names = get_census_names()
     tweets=get_twitter(twittesFile)+get_twitter(FriendstwittesFile)
-    test_tweet = tweets[10]
+    #tweets = get_twitter(twittesFile)
+    #frientweets =    get_twitter(FriendstwittesFile)
+
+    #print("tweets is", tweets)
+    #print("friends tweets is", frientweets)
+
+    test_tweet = tweets[1]
     print('test tweet:\n\tscreen_name=%s\n\tname=%s\n\tdescr=%s\n\ttext=%s' %
           (test_tweet['user']['screen_name'],
            test_tweet['user']['name'],
            test_tweet['user']['description'],
            test_tweet['text']))
+
+    #print("tweets is", tweets)
     tokens_list = [tweet2tokens(t, use_descr=True, lowercase=True,
                                 keep_punctuation=False, descr_prefix='d=',
                                 collapse_urls=True, collapse_mentions=True)
@@ -122,7 +155,7 @@ def main():
 
     vocabulary = make_vocabulary(tokens_list)
     # store these in a sparse matrix
-    X = make_feature_matrix(tokens_list, vocabulary)
+    X = make_feature_matrix(tweets, tokens_list, vocabulary)
     print('shape of X:', X.shape)
     print(X[10])
 
