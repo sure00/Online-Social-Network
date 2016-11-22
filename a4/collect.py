@@ -17,8 +17,8 @@ access_token = '769354220537602048-lt18gDc963UdQGJinrfIYD8pwkmaiHT'
 access_token_secret = 'ze4ACglFMf5dYfgdL3LUUepgBymJJbu3OCjjN5AvcZpFG'
 
 searchKey='realDonaldTrum'
-savedFile = 'tweetsData.pkl'
-savedFriendsTwitts='friendstweetsData.pkl'
+twitterFile = 'tweetsData.pkl'
+userFile='user.pkl'
 
 def get_twitter():
     """ Construct an instance of TwitterAPI using the tokens you entered above.
@@ -50,7 +50,23 @@ def robust_request(twitter, resource, params, max_tries=5):
             time.sleep(61 * 15)
 
 # append to database
-def saveData(tweets,friendsTwitts):
+def saveData(tweets,file):
+           """ save the collect data to tweetsData.txt.
+           Args:
+             twitters .... Collect data from twitter.
+           Returns:
+             NULL
+           """
+           f = open(file, 'wb+')
+           #tweets = [t for t in tweets if 'user' in t]
+           #print('fetched %d tweets' % len(tweets))
+           pickle.dump(tweets, f)
+           f.close()
+           print("Twittes File %s saved successfully" %file)
+
+
+# append to database
+def saveTweetsData(tweets,friendsTwitts):
     """ save the collect data to tweetsData.txt.
     Args:
       twitters .... Collect data from twitter.
@@ -72,7 +88,7 @@ def saveData(tweets,friendsTwitts):
     print("Data had saved to %s" %savedFile)
     print("Data had saved to %s" %savedFriendsTwitts)
 
-def getData(twitter,limit):
+def getTwittesData(twitter,limit):
     """ Get the twitter data with stream API.
     Args:
       twitter .... A TwitterAPI object.
@@ -153,7 +169,7 @@ def get_friends(twitter, screen_name):
     """
     #print("Twitter user screen name is", screen_name)
     respond  = robust_request(twitter, 'friends/ids', {'screen_name': screen_name}, 5 )
-    friends  = [r for r in respond][:200]
+    friends  = [r for r in respond][:100]
 
     filtedFriends, friendsTwitts =filterFriends(twitter, friends)
     print(" %s have %d friends have tweets contain Trump"%(screen_name,len(filtedFriends)))
@@ -161,6 +177,24 @@ def get_friends(twitter, screen_name):
     filtedFriends.sort()
     #print(friends)
     return filtedFriends,friendsTwitts
+
+def get_friends(twitter, user_id):
+
+    respond  = robust_request(twitter, 'friends/ids', {'user_id': user_id}, 5 )
+    friends  = [r for r in respond][:200]
+
+    friends.sort()
+    print("User %d have %d friends" %(user_id, len(friends)))
+    return (friends)
+
+def getUserData(twitter, twitters):
+    user={}
+    for t in twitters:
+        #user.setdefault(t['user']["id"], []).append(get_friends(twitter,  t['user']["id"]))
+        user[t['user']["id"]] = get_friends(twitter, t['user']["id"])
+
+    return user
+
 
 def findFriendstweets(twitter, twitters):
     '''Base on the twitter data to expand the network for using detect community algorithm to find the community.
@@ -179,10 +213,25 @@ def findFriendstweets(twitter, twitters):
     return friendsTwitts
 
 if __name__ == '__main__':
+    print("start collecting")
     twitter = get_twitter()
-    twitters = getData(twitter, limit=3)
+    print("start to collect twittes")
+
+    #collect twittes data
+    twitters = getTwittesData(twitter, limit=10)
+    saveData(twitters, twitterFile)
+
+    #get user data
+    user = getUserData(twitter, twitters[:5])
+    print("user is", user)
+    saveData(user, userFile)
+    #check data
+    #with open(filename, "rb") as file:
+        #unpickler = pickle.Unpickler(file)
+        #tweets = unpickler.load()
+
+
     #print("Changing from streaming request to REST at %s " %(str(datetime.datetime.now())))
     #time.sleep(61 * 15)
-    friendsTwitts = findFriendstweets(twitter, twitters)
+    #friendsTwitts = findFriendstweets(twitter, twitters)
 
-    saveData(twitters, friendsTwitts)

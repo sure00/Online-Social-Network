@@ -7,6 +7,7 @@ import urllib.request
 import os
 import pickle
 import matplotlib.pyplot as plt
+import itertools
 
 def loadData(filename):
     """ Load twittes which collected in collect period
@@ -24,14 +25,27 @@ def loadData(filename):
         try:
             with open(filename, "rb") as file:
                 unpickler = pickle.Unpickler(file)
-                tweets = unpickler.load()
+                data = unpickler.load()
         except EOFError:
             return {}
 
-    print(len(tweets))
-    return tweets
+    print("Load %d user data "%len(data))
+    return data
 
-def constructGraph(tweets):
+def calcJaccard(user, k):
+    scores=[]
+
+    roots = user.keys()
+    for pair in itertools.combinations(roots,2):
+        set1=set(user[pair[0]])
+        set2=set(user[pair[1]])
+
+        scores.append(((pair[0], pair[1]), 1. * len(set1 & set2) / len(set1 | set2)))
+
+    return sorted(scores, key=lambda x: (-x[1], x[0]))[0:k]
+    #return sorted(scores, key=lambda x: (-x[1], x[0]))
+
+def constructGraph(user, JaccardScore):
     """ Construct the Graph with tweets user id and his friends.
 
     Args:
@@ -40,10 +54,19 @@ def constructGraph(tweets):
     Returns:
     return graph
     """
-
+    rootlist=[]
     g = nx.Graph()
-    for t in tweets:
-        g.add_edges_from([(t['user']['id'], friend) for friend in t['user']['friends']])
+
+    for pair in JaccardScore:
+        node1 = pair[0][0]
+        node2 = pair[0][1]
+        if node1 not in rootlist:
+            #print("pair[0]",pair[0])
+            #print("its friends is",user[node1] )
+            g.add_edges_from([(node1, friend) for friend in user[node1]])
+        if node2 not in rootlist:
+            g.add_edges_from([(node2, friend) for friend in user[node2]])
+        rootlist.extend(pair)
     return g
 
 def friend_overlap(tweets):
@@ -116,72 +139,29 @@ def draw_network(graph,  filename):
 
     #nx.draw(graph,  labels=custom_labels, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c')
     nx.draw_networkx(graph, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c',pos=nx.spring_layout(graph))
-    plt.savefig('Image/'+filename)
-    #plt.show()
+    plt.savefig(filename)
 
 
 def main():
     """
     FYI: This takes ~10-15 seconds to run on my laptop.
     """
-    tweetFile = 'tweetsData.pkl'
-    tweets = loadData(tweetFile)
-    graph = constructGraph(tweets)
+    userFile = 'user.pkl'
+    users = loadData(userFile)
+    print("users is ", users)
 
-    total = 0
-    for t in tweets:
-        #print("tweet id is %d, friends total have %d" %(t['user']['id'],len(t['user']['friends'])))
-        total +=len(t['user']['friends'])
+    JaccardScore = calcJaccard(users, 3)
+    print("Jaccard Score Top 3 is ", JaccardScore)
 
-
-    print("total edge is", total)
+    graph = constructGraph(users, JaccardScore)
     print('graph has %s nodes and %s edges' % (len(graph.nodes()), len(graph.edges())))
-    friend_overlap(tweets)
 
     components = girvan_newman(graph)
 
     for i, c in enumerate(components):
         print("components have %s nodes" % (str(c.nodes())))
         draw_network(c, 'copmonent'+str(i)+'.png')
-
-    #draw_network(graph, users, 'network.png')
-
     draw_network(graph, 'network.png')
-    print('network drawn to network.png')
 
-    """
-    graph = read_graph()
-    print('graph has %d nodes and %d edges' %
-          (graph.order(), graph.number_of_edges()))
-
-    subgraph = get_subgraph(graph, 2)
-    print('subgraph has %d nodes and %d edges' %
-          (subgraph.order(), subgraph.number_of_edges()))
-    print('norm_cut scores by max_depth:')
-    print(score_max_depths(subgraph, range(1,5)))
-    clusters = partition_girvan_newman(subgraph, 3)
-    print('first partition: cluster 1 has %d nodes and cluster 2 has %d nodes' %
-          (clusters[0].order(), clusters[1].order()))
-    print('cluster 2 nodes:')
-    print(clusters[1].nodes())
-
-    test_node = 'Bill Gates'
-    train_graph = make_training_graph(subgraph, test_node, 5)
-    print('train_graph has %d nodes and %d edges' %
-          (train_graph.order(), train_graph.number_of_edges()))
-
-
-    jaccard_scores = jaccard(train_graph, test_node, 5)
-    print('\ntop jaccard scores for Bill Gates:')
-    print(jaccard_scores)
-    print('jaccard accuracy=%g' %
-          evaluate([x[0] for x in jaccard_scores], subgraph))
-
-    path_scores = path_score(train_graph, test_node, k=5, beta=.1)
-    print('\ntop path scores for Bill Gates for beta=.1:')
-    print(path_scores)
-    print('path accuracy for beta .1=%g' %
-          evaluate([x[0] for x in path_scores], subgraph))
-    """
 if __name__ == '__main__':
     main()
