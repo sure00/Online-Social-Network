@@ -218,7 +218,7 @@ if __name__ == '__main__':
     print("start to collect twittes")
 
     #collect twittes data
-    twitters = getTwittesData(twitter, limit=10)
+    twitters = getTwittesData(twitter, limit=5)
     saveData(twitters, twitterFile)
 
     #get user data

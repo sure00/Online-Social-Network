@@ -19,7 +19,6 @@ import pickle
 
 
 twittesFile = 'tweetsData.pkl'
-FriendstwittesFile='friendstweetsData.pkl'
 
 def get_census_names():
     """ Fetch a list of common male/female names from the census.
@@ -82,7 +81,7 @@ def tokenize(string, lowercase, keep_punctuation, prefix,
 def tweet2tokens(tweet, use_descr=True, lowercase=True,
                  keep_punctuation=True, descr_prefix='d=',
                  collapse_urls=True, collapse_mentions=True):
-    print("tweet obj is ", tweet)
+    #print("tweet obj is ", tweet)
     tokens = tokenize(tweet['text'], lowercase, keep_punctuation, None,
                       collapse_urls, collapse_mentions)
 
@@ -100,6 +99,11 @@ def make_vocabulary(tokens_list):
     print("%d unique terms in vocabulary" %len(vocabulary))
     return vocabulary
 
+def get_first_name(tweet):
+    if 'user' in tweet and 'name' in tweet['user']:
+        parts = tweet['user']['name'].split()
+        if len(parts) > 0:
+            return parts[0].lower()
 
 def make_feature_matrix(tweets, tokens_list, vocabulary):
     X=lil_matrix((len(tweets), len(vocabulary)))
@@ -133,12 +137,9 @@ def do_cross_val(X, y, nfolds):
 
 def main():
     male_names, female_names = get_census_names()
-    tweets=get_twitter(twittesFile)+get_twitter(FriendstwittesFile)
-    #tweets = get_twitter(twittesFile)
-    #frientweets =    get_twitter(FriendstwittesFile)
+    tweets=get_twitter(twittesFile)
 
     #print("tweets is", tweets)
-    #print("friends tweets is", frientweets)
 
     test_tweet = tweets[1]
     print('test tweet:\n\tscreen_name=%s\n\tname=%s\n\tdescr=%s\n\ttext=%s' %
@@ -156,15 +157,13 @@ def main():
     vocabulary = make_vocabulary(tokens_list)
     # store these in a sparse matrix
     X = make_feature_matrix(tweets, tokens_list, vocabulary)
-    print('shape of X:', X.shape)
-    print(X[10])
+    #print('shape of X:', X.shape)
+    #print(X[10])
 
     y = np.array([get_gender(t, male_names, female_names) for t in tweets])
     print('gender labels:', Counter(y))
 
     print('avg accuracy', do_cross_val(X, y, 5))
-
-
 
 
 if __name__ == '__main__':
