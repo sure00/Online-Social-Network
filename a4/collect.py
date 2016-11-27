@@ -1,5 +1,3 @@
-
-
 """
 collect.py
 """
@@ -17,7 +15,7 @@ access_token = '769354220537602048-lt18gDc963UdQGJinrfIYD8pwkmaiHT'
 access_token_secret = 'ze4ACglFMf5dYfgdL3LUUepgBymJJbu3OCjjN5AvcZpFG'
 
 searchKey='realDonaldTrum'
-twitterFile = 'tweetsData.pkl'
+twitterFile = 'tweets.pkl'
 userFile='user.pkl'
 
 def get_twitter():
@@ -63,30 +61,6 @@ def saveData(tweets,file):
            pickle.dump(tweets, f)
            f.close()
            print("Twittes File %s saved successfully" %file)
-
-
-# append to database
-def saveTweetsData(tweets,friendsTwitts):
-    """ save the collect data to tweetsData.txt.
-    Args:
-      twitters .... Collect data from twitter.
-    Returns:
-      NULL
-    """
-    f = open(savedFile, 'wb+')
-    f2 = open(savedFriendsTwitts, 'wb+')
-
-    tweets = [t for t in tweets if 'user' in t]
-    friendtweets = [t for t in friendsTwitts if 'user' in t]
-    print('fetched %d tweets' % len(tweets))
-    print('fetched %d tweets' % len(friendtweets))
-
-    pickle.dump(tweets, f)
-    pickle.dump(friendsTwitts, f2)
-    f.close()
-    f2.close()
-    print("Data had saved to %s" %savedFile)
-    print("Data had saved to %s" %savedFriendsTwitts)
 
 def getTwittesData(twitter,limit):
     """ Get the twitter data with stream API.
@@ -200,7 +174,6 @@ def findFriendstweets(twitter, twitters):
     '''Base on the twitter data to expand the network for using detect community algorithm to find the community.
     Args:
         twitters... A list of tweets
-
     Return:
          A new list of tweets which can construct a network
     '''
@@ -234,4 +207,3 @@ if __name__ == '__main__':
     #print("Changing from streaming request to REST at %s " %(str(datetime.datetime.now())))
     #time.sleep(61 * 15)
     #friendsTwitts = findFriendstweets(twitter, twitters)
-

@@ -9,6 +9,7 @@ import pickle
 import matplotlib.pyplot as plt
 import itertools
 
+clusterFile =  'cluster.pkl'
 def loadData(filename):
     """ Load twittes which collected in collect period
 
@@ -141,6 +142,20 @@ def draw_network(graph,  filename):
     nx.draw_networkx(graph, node_list = custom_node_sizes.keys(), node_size=100,edge_color='c',pos=nx.spring_layout(graph))
     plt.savefig(filename)
 
+# append to database
+def saveData(data,file):
+           """ save the collect data to tweetsData.txt.
+           Args:
+             twitters .... Collect data from twitter.
+           Returns:
+             NULL
+           """
+           f = open(file, 'wb+')
+           #tweets = [t for t in tweets if 'user' in t]
+           #print('fetched %d tweets' % len(tweets))
+           pickle.dump(data, f)
+           f.close()
+           print("Data %s saved successfully" %file)
 
 def main():
     """
@@ -163,5 +178,6 @@ def main():
         draw_network(c, 'copmonent'+str(i)+'.png')
     draw_network(graph, 'network.png')
 
+    saveData(components, clusterFile)
 if __name__ == '__main__':
     main()

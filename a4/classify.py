@@ -14,11 +14,24 @@ import numpy as np
 from sklearn.cross_validation import KFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.feature_extraction.text import CountVectorizer
 import os
 import pickle
+from io import BytesIO, StringIO
+from zipfile import ZipFile
+import urllib.request
+import pandas as pd
 
+twittesFile = 'tweets.pkl'
+classifyDataFile = 'classify.pkl'
 
-twittesFile = 'tweetsData.pkl'
+def getSentimentData():
+    # The file is 78M, so this will take a while.
+    url = urllib.request.urlopen('http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip')
+    zipfile = ZipFile(BytesIO(url.read()))
+    tweet_file = zipfile.open('testdata.manual.2009.06.14.csv')
+    return tweet_file
+
 
 def get_census_names():
     """ Fetch a list of common male/female names from the census.
@@ -52,60 +65,60 @@ def get_twitter(filename):
         except EOFError:
             return {}
 
-    print(len(tweets))
     return tweets
 
 
-def tokenize(string, lowercase, keep_punctuation, prefix,
-             collapse_urls, collapse_mentions):
+def tokenize(s,  keep_punctuation, prefix):
 
     """ split a tweet into tokens. """
-    if not string:
+    if not s:
         return []
-    if lowercase:
-        string = string.lower()
+
+    s = s.lower()
 
     tokens=[]
-    if collapse_urls:
-        string = re.sub('http\S+', 'THIS_IS_A_URL', string)
-    if collapse_mentions:
-        string = re.sub('@\S+', 'THIS_IS_A_MENTION', string)
+    s = re.sub('http\S+', 'THIS_IS_A_URL', s)
+    s = re.sub('@\S+', 'THIS_IS_A_MENTION', s)
     if keep_punctuation:
-        tokens=string.split()
+        tokens=s.split()
     else:
-        tokens=re.sub('\W+', ' ', string).split()
+        tokens=re.sub('\W+', ' ', s).split()
     if prefix:
         tokens=['%s%s' % (prefix, t) for t in tokens]
     return tokens
 
-def tweet2tokens(tweet, use_descr=True, lowercase=True,
+def tweet2tokens(tweet, csv, use_descr=True, lowercase=True,
                  keep_punctuation=True, descr_prefix='d=',
                  collapse_urls=True, collapse_mentions=True):
     #print("tweet obj is ", tweet)
-    tokens = tokenize(tweet['text'], lowercase, keep_punctuation, None,
-                      collapse_urls, collapse_mentions)
+    if csv == True:
+        text = tweet[5]
+    else:
+        text =tweet['text']
+    tokens = tokenize(text,  keep_punctuation, None,
+                      )
 
     if use_descr:
-        tokens.extend(tokenize(tweet['user']['description'], lowercase,
+        tokens.extend(tokenize(tweet['user']['description'],
                                keep_punctuation, descr_prefix,
-                               collapse_urls, collapse_mentions))
+                               ))
     return tokens
 
-def make_vocabulary(tokens_list):
-    vocabulary = defaultdict(lambda: len(vocabulary)) #if term not present, assign next it
-    for tokens in tokens_list:
-        for token in tokens:
-            vocabulary[token]
-    print("%d unique terms in vocabulary" %len(vocabulary))
-    return vocabulary
+def makeVocab(tokensList):
+    vocab = defaultdict(lambda: len(vocab)) #if term not present, assign next it
+    for tokens in tokensList:
+        for t in tokens:
+            vocab[t]
+    #print("%d unique terms in vocabulary" %len(vocab))
+    return vocab
 
-def get_first_name(tweet):
+def getFirstName(tweet):
     if 'user' in tweet and 'name' in tweet['user']:
-        parts = tweet['user']['name'].split()
-        if len(parts) > 0:
-            return parts[0].lower()
+        p = tweet['user']['name'].split()
+        if len(p) > 0:
+            return p[0].lower()
 
-def make_feature_matrix(tweets, tokens_list, vocabulary):
+def makeFeatureMatrix(tweets, tokens_list, vocabulary):
     X=lil_matrix((len(tweets), len(vocabulary)))
     for i, tokens in enumerate(tokens_list):
         for token in tokens:
@@ -113,57 +126,153 @@ def make_feature_matrix(tweets, tokens_list, vocabulary):
             X[i,j] += 1
     return X.tocsr()# convert to CSR for more efficient random access.
 
-def get_gender(tweet, male_names, female_names):
-    name= get_first_name(tweet)
-    if name in female_names:
+def getGender(tweet, maleNames, femaleNames):
+    name= getFirstName(tweet)
+    if name in femaleNames:
         return 1
-    elif name in male_names:
+    elif name in maleNames:
         return 0
     else:
         return -1
 
-def do_cross_val(X, y, nfolds):
+def doCrossVal(X, y, nfolds):
     cv=KFold(len(y), nfolds)
-    accuracies=[]
+    acc=[]
 
     for train_idx, test_idx in cv:
         clf=LogisticRegression()
         clf.fit(X[train_idx], y[train_idx])
         predicted = clf.predict(X[test_idx])
-        acc=accuracy_score(y[test_idx], predicted)
-        accuracies.append(acc)
-    avg=np.mean(accuracies)
+        tmp=accuracy_score(y[test_idx], predicted)
+        acc.append(tmp)
+    avg=np.mean(acc)
     return avg
 
+
+def getLogisClf(C = 1.,penalty = 'l2'):
+    return LogisticRegression(C = C,penalty=penalty,random_state=42)
+
+def print_results(data):
+        print("\tTweets  aganist Trump\t\t%d" %data[0])
+        print("\tNeutral  tweets on Trump\t\t%d" %data[2])
+        print("\tSupport  Trump tweets\t\t\t%d" %data[4])
+
+def classifyTweets(predictes):
+    Againist=[]
+    Neutral=[]
+    Support=[]
+
+    for i in range(len(predictes)):
+        if predictes[i]==0:
+            Againist.append(i)
+        elif predictes[i]==2:
+            Neutral.append(i)
+        elif predictes[i]==4:
+            Support.append(i)
+
+    return Againist, Neutral, Support
+
+# append to database
+def saveData(data,file):
+           """ save the collect data to tweetsData.txt.
+           Args:
+             twitters .... Collect data from twitter.
+           Returns:
+             NULL
+           """
+           f = open(file, 'wb+')
+           #tweets = [t for t in tweets if 'user' in t]
+           #print('fetched %d tweets' % len(tweets))
+           pickle.dump(data, f)
+           f.close()
+           print("data %s saved successfully" %file)
+
 def main():
+    savedData={}
+    #Gets tweets
+    testTweets = get_twitter(twittesFile)
+    if testTweets =={}:
+        return
+
+    #Check Sentiment of twittes
+    trainingFile = getSentimentData()
+    trainingTweets = pd.read_csv(trainingFile,header=None,names=['polarity', 'id', 'date',
+                                                       'query', 'user', 'text'])
+
+    # Feturerize
+    TrainingLabel = np.array(trainingTweets['polarity'])
+    print("TrainingLabel", len(TrainingLabel))
+
+    #Training vectorizer
+    training_tokens_list = [tweet2tokens(t, csv=True, use_descr=False, lowercase=True,
+                                keep_punctuation=False, descr_prefix='',
+                                collapse_urls=True, collapse_mentions=True )
+                   for t in trainingTweets.values]
+    vocabulary = makeVocab(training_tokens_list)
+    print("len vocab is",len(vocabulary))
+
+    #Get feature of text
+    test_tokens_list = [tweet2tokens(t,csv=False, use_descr=True, lowercase=True,
+                                keep_punctuation=False, descr_prefix='',
+                                collapse_urls=True, collapse_mentions=True)
+                   for t in testTweets]
+    #print("tokens_list is", tokens_list)
+    test_vocabulary = makeVocab(test_tokens_list)
+
+    # merge two vocabulay together
+    vocabulary.update(test_vocabulary)
+
+    TrainX = makeFeatureMatrix(trainingTweets, training_tokens_list, vocabulary)
+    TestX = makeFeatureMatrix(testTweets, test_tokens_list, vocabulary)
+
+    #Fit A logistrcRegression model
+    clf_logistic1 = getLogisClf(C=1.0)
+    clf_logistic1.fit(TrainX, TrainingLabel)
+
+    # Classify Data
+    predictes = clf_logistic1.predict(TestX)
+    Againist_idx, Neutral_idx, Support_idx = classifyTweets(predictes)
+    #print_results(Counter(predictes))
+    savedData['Sentiment']=Counter(predictes)
+
     male_names, female_names = get_census_names()
-    tweets=get_twitter(twittesFile)
 
     #print("tweets is", tweets)
-
-    test_tweet = tweets[1]
-    print('test tweet:\n\tscreen_name=%s\n\tname=%s\n\tdescr=%s\n\ttext=%s' %
-          (test_tweet['user']['screen_name'],
-           test_tweet['user']['name'],
-           test_tweet['user']['description'],
-           test_tweet['text']))
-
-    #print("tweets is", tweets)
-    tokens_list = [tweet2tokens(t, use_descr=True, lowercase=True,
+    tokens_list = [tweet2tokens(t,csv=False, use_descr=True, lowercase=True,
                                 keep_punctuation=False, descr_prefix='d=',
                                 collapse_urls=True, collapse_mentions=True)
-                   for t in tweets]
+                   for t in testTweets]
 
-    vocabulary = make_vocabulary(tokens_list)
+    vocabulary = makeVocab(tokens_list)
     # store these in a sparse matrix
-    X = make_feature_matrix(tweets, tokens_list, vocabulary)
-    #print('shape of X:', X.shape)
-    #print(X[10])
+    X = makeFeatureMatrix(testTweets, tokens_list, vocabulary)
 
-    y = np.array([get_gender(t, male_names, female_names) for t in tweets])
-    print('gender labels:', Counter(y))
+    y = np.array([getGender(t, male_names, female_names) for t in testTweets])
+    #print('gender labels:', Counter(y))
 
-    print('avg accuracy', do_cross_val(X, y, 5))
+    clf=LogisticRegression()
+    clf.fit(X, y)
+
+    predicted = clf.predict(X[Againist_idx])
+    #print("Againist Trump is", Counter(predicted))
+    acc = accuracy_score(y[Againist_idx], predicted)
+    print("Againist Gender acc is", acc)
+    savedData['AgainistGender']=predicted
+
+    predicted = clf.predict(X[Neutral_idx])
+    #print("Neutral Trump is", Counter(predicted))
+    acc = accuracy_score(y[Neutral_idx], predicted)
+    print("Neutral Gender acc is", acc)
+    savedData['NeutralGender'] = predicted
+
+    predicted = clf.predict(X[Support_idx])
+    #print("Support Trump is", Counter(predicted))
+    acc = accuracy_score(y[Support_idx], predicted)
+    print("Support Gender acc is", acc)
+    savedData['SupportGender'] = predicted
+
+    saveData(savedData, classifyDataFile)
+
 
 
 if __name__ == '__main__':
