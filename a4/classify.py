@@ -232,8 +232,11 @@ def main():
     # Classify Data
     predictes = clf_logistic1.predict(TestX)
     Againist_idx, Neutral_idx, Support_idx = classifyTweets(predictes)
-    #print_results(Counter(predictes))
-    savedData['Sentiment']=Counter(predictes)
+    print_results(Counter(predictes))
+
+    savedData['Againist_idx']= Againist_idx
+    savedData['Neutral_idx'] = Neutral_idx
+    savedData['Support_idx'] = Support_idx
 
     male_names, female_names = get_census_names()
 

@@ -172,6 +172,7 @@ def main():
     print('graph has %s nodes and %s edges' % (len(graph.nodes()), len(graph.edges())))
 
     components = girvan_newman(graph)
+    print("compoents is", components)
 
     for i, c in enumerate(components):
         print("components have %s nodes" % (str(c.nodes())))

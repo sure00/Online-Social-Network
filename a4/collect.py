@@ -191,19 +191,10 @@ if __name__ == '__main__':
     print("start to collect twittes")
 
     #collect twittes data
-    twitters = getTwittesData(twitter, limit=5)
+    twitters = getTwittesData(twitter, limit=15)
     saveData(twitters, twitterFile)
 
     #get user data
     user = getUserData(twitter, twitters[:5])
     print("user is", user)
     saveData(user, userFile)
-    #check data
-    #with open(filename, "rb") as file:
-        #unpickler = pickle.Unpickler(file)
-        #tweets = unpickler.load()
-
-
-    #print("Changing from streaming request to REST at %s " %(str(datetime.datetime.now())))
-    #time.sleep(61 * 15)
-    #friendsTwitts = findFriendstweets(twitter, twitters)
