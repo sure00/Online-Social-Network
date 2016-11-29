@@ -35,12 +35,12 @@ def loadData(filename):
         except EOFError:
             return {}
 
-    print("Load %d  data "%len(data))
+    #print("Load %d  data "%len(data))
     return data
 
 # append to database
 def saveData(data,filePath):
-    with open(filePath, "w+") as f:
+    with open(filePath, "w+",encoding='utf-8') as f:
         for item in data:
                 f.write(item)
                 f.write('\n')
@@ -83,15 +83,15 @@ def main():
     #print(tweets[2])
     #print(classify['Againist_idx'][2])
 
-    print(tweets[2]['text'])
+    #print(tweets[2]['text'])
 
-    summary.append('\tInstance of Aganist Trump Tweets: ' + str(tweets[(classify['Againist_idx'])[0]]['text']))
-    summary.append('\tInstance of Neutral Trump Tweets: ' + str(tweets[(classify['Neutral_idx'])[0]]['text']))
-    summary.append('\tInstance of Support Trump Tweets: ' + str(tweets[(classify['Support_idx'])[0]]['text']))
+    summary.append('\tInstance of Aganist Trump Tweets: ' + str(tweets[(classify['Againist_idx'])[-1]]['text']))
+    summary.append('\tInstance of Neutral Trump Tweets: ' + str(tweets[(classify['Neutral_idx'])[-1]]['text']))
+    summary.append('\tInstance of Support Trump Tweets: ' + str(tweets[(classify['Support_idx'])[-1]]['text']))
 
-    print([(classify['Againist_idx'])[1]])
-    print([(classify['Neutral_idx'])[1]])
-    print([(classify['Support_idx'])[1]])
+    #print([(classify['Againist_idx'])[1]])
+    #print([(classify['Neutral_idx'])[1]])
+    #print([(classify['Support_idx'])[1]])
 
     SupportGender = Counter(classify['SupportGender'])
     #print(SupportGender)

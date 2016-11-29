@@ -1,19 +1,19 @@
 Number of users collected: 1000
-Number of messages collected: 1500
+Number of messages collected: 1000
 
 Number of communities discovered: 2
-Average number of users per community:238.0
+Average number of users per community:396.5
 
 Number of instances per class found: 
-	Aganist Trump Tweets: 461
-	Neutral Trump Tweets: 421
-	Support Trump Tweets: 618
+	Aganist Trump Tweets: 290
+	Neutral Trump Tweets: 256
+	Support Trump Tweets: 454
 
 Number of instances per class found:  
-	Instance of Aganist Trump Tweets: RT @lisa_S_13: So you even know who you are supposed to be thanking ? I don't think so. https://t.co/AEWO7rjO1X
-	Instance of Neutral Trump Tweets: RT @Brennanator: Guys, let's take a minute to pity the history teachers of the future. https://t.co/buRREQFJV4
-	Instance of Support Trump Tweets: RT @SusanSchorn: "what PROOF do u have that DonaldTrump is not tormented by millions of invisible GARDEN gnomes?" https://t.co/GfnB6ceCtw
+	Instance of Aganist Trump Tweets: Hey @Reince, @realDonaldTrump is a coward, a little nothing of a man who's scared of words -- and your fault. Just thought you should know.
+	Instance of Neutral Trump Tweets: @realDonaldTrump just like idiots who mocks or calls persons with disabilities "retarded" you jackass, Here's a concept, start respecting -&gt;
+	Instance of Support Trump Tweets: @realDonaldTrump Mr. President Elect, I am writing to say I believe in you 100%, and, please make GOLD our backing to the Dollar again
 
-	For the tweets that Support Trump there are 0.2621359223300971% femal 0.20064724919093851% male
-	For the tweets that Neutral Trump there are 0.27078384798099764% femal 0.1995249406175772% male
-	For the tweets that Againist Trump there are 0.3188720173535792% femal 0.2017353579175705% male
+	For the tweets that Support Trump there are 0.30176211453744495% femal 0.2555066079295154% male
+	For the tweets that Neutral Trump there are 0.109375% femal 0.26953125% male
+	For the tweets that Againist Trump there are 0.1206896551724138% femal 0.2517241379310345% male

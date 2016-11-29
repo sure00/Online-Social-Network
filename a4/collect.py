@@ -14,7 +14,7 @@ consumer_secret = 'XoUbK9DXQpyI9X923fi2cGvQ1pABONUHXVKETmPCpMlc0aebcH'
 access_token = '769354220537602048-lt18gDc963UdQGJinrfIYD8pwkmaiHT'
 access_token_secret = 'ze4ACglFMf5dYfgdL3LUUepgBymJJbu3OCjjN5AvcZpFG'
 
-searchKey='realDonaldTrum'
+searchKey='@realDonaldTrump'
 twitterFile = 'tweets.pkl'
 userFile='user.pkl'
 
@@ -75,13 +75,21 @@ def getTwittesData(twitter,limit):
     tweets = []
 
     # Fetching tweets with stream api
-    for request in robust_request(twitter, 'statuses/filter', {'track': searchKey}):
-        tweets.append(request)
-        #if len(tweets) % 5 == 0:
-        if len(tweets) % 100 == 0:
-            print('found %d tweets talk about %s' %(len(tweets),searchKey))
-        #if len(tweets) >= 5*limit:
-        if len(tweets) >= 100 * limit:
+    #tweets = api.
+    while(True):
+        for request in robust_request(twitter,'search/tweets', {'q': searchKey, 'count': 4000}):
+        #for request in robust_request(twitter, 'statuses/filter', {'track':searchKey}):
+            #request = request.json()
+            #print(request)
+            #if  searchKey not in request['text']:
+                #print("sure debug %s" %request['text'])
+                #continue
+            tweets.append(request)
+            #if len(tweets) % 5 == 0:
+            if len(tweets) % 100 == 0:
+                print('found %d tweets talk about %s' %(len(tweets),searchKey))
+            #if len(tweets) >= 5*limit:
+            if len(tweets) >= 100 * limit:
                 return  tweets
 
 # using  to filtering all the friends who have Twitte about trump.
@@ -191,10 +199,12 @@ if __name__ == '__main__':
     print("start to collect twittes")
 
     #collect twittes data
-    twitters = getTwittesData(twitter, limit=15)
+    twitters = getTwittesData(twitter, limit=10)
+    #print(twitters)
     saveData(twitters, twitterFile)
 
     #get user data
+    #print("twitters is ",twitters)
     user = getUserData(twitter, twitters[:5])
-    print("user is", user)
+    #print("user is", user)
     saveData(user, userFile)
