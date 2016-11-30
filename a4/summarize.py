@@ -108,6 +108,7 @@ def main():
                    + str(AgainistGender[0]/sum(AgainistGender.values())) + '% male')
 
     saveData(summary,summaryFile)
+    print("Summarize Done")
 
 
 if __name__ == '__main__':
