@@ -85,9 +85,9 @@ def main():
 
     #print(tweets[2]['text'])
 
-    summary.append('\t\nInstance of Aganist Trump Tweets: ' + str(tweets[(classify['Againist_idx'])[-1]]['text']))
-    summary.append('\t\nInstance of Neutral Trump Tweets: ' + str(tweets[(classify['Neutral_idx'])[-1]]['text']))
-    summary.append('\t\nInstance of Support Trump Tweets: ' + str(tweets[(classify['Support_idx'])[-1]]['text']))
+    summary.append('\t\nInstance of Aganist Trump Tweets: ' + str(tweets[(classify['Againist_idx'])[0]]['text']))
+    summary.append('\t\nInstance of Neutral Trump Tweets: ' + str(tweets[(classify['Neutral_idx'])[0]]['text']))
+    summary.append('\t\nInstance of Support Trump Tweets: ' + str(tweets[(classify['Support_idx'])[0]]['text']))
 
     #print([(classify['Againist_idx'])[1]])
     #print([(classify['Neutral_idx'])[1]])
@@ -104,13 +104,12 @@ def main():
     getFemal =getMale=0
     for index in range(len(classify['SupportGender'])):
         if getFemal == 1 and getMale ==1:
-            print(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name'])
-            print(tweets[classify['Againist_idx'][maleNameId]]['user']['name'])
+            #print(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name'])
+            #print(tweets[classify['Againist_idx'][maleNameId]]['user']['name'])
 
-            summary.append('\nIn Support Trump tweets, one female name is :' +
+            summary.append('In Support Trump tweets, one female name is :' +
                            str(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name']) + '\t male name :'
                            + str(tweets[classify['Againist_idx'][maleNameId]]['user']['name']))
-
             break
         if getFemal ==0 and classify['SupportGender'][index] == 1:
             femaleNamesID= index
@@ -121,16 +120,16 @@ def main():
 
 
     summary.append('\t\nThere are ' + str(NeutralGender[1]/sum(NeutralGender.values())) + '% femal neutral Trump and '
-                   + str(NeutralGender[0]/sum(NeutralGender.values())) + '% male\n')
+                   + str(NeutralGender[0]/sum(NeutralGender.values())) + '% male')
 
     #print("Againist_idx",classify['Againist_idx'])
     getFemal =getMale=0
     for index in range(len(classify['NeutralGender'])):
         if getFemal == 1 and getMale ==1:
-            print(tweets[classify['Neutral_idx'][femaleNamesID]]['user']['name'])
-            print(tweets[classify['Neutral_idx'][maleNameId]]['user']['name'])
+            #print(tweets[classify['Neutral_idx'][femaleNamesID]]['user']['name'])
+            #print(tweets[classify['Neutral_idx'][maleNameId]]['user']['name'])
 
-            summary.append('\nIn Neutral Trump tweets, one female name is :' +
+            summary.append('In Neutral Trump tweets, one female name is :' +
                            str(tweets[classify['Neutral_idx'][femaleNamesID]]['user']['name']) + '\t male name :'
                            + str(tweets[classify['Neutral_idx'][maleNameId]]['user']['name']))
             break
@@ -142,15 +141,15 @@ def main():
             getMale =1
 
     summary.append('\t\nThere are  ' + str(AgainistGender[1]/sum(AgainistGender.values())) + '% femal againist Trump and'
-                   + str(AgainistGender[0]/sum(AgainistGender.values())) + '% male\n')
+                   + str(AgainistGender[0]/sum(AgainistGender.values())) + '% male')
 
     getFemal =getMale=0
     for index in range(len(classify['AgainistGender'])):
         if getFemal == 1 and getMale ==1:
-            print(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name'])
-            print(tweets[classify['Againist_idx'][maleNameId]]['user']['name'])
+            #print(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name'])
+            #print(tweets[classify['Againist_idx'][maleNameId]]['user']['name'])
 
-            summary.append('\nIn Againist Trump tweets, one female name is :' +
+            summary.append('In Againist Trump tweets, one female name is :' +
                            str(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name']) + '\t male name :'
                            + str(tweets[classify['Againist_idx'][maleNameId]]['user']['name']))
             break
@@ -167,11 +166,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-"""
-Number of users collected:
-Number of messages collected:
-Number of communities discovered:
-Average number of users per community:
-Number of instances per class found:
-One example from each class:
-"""

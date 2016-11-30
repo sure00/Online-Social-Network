@@ -1,34 +1,30 @@
-Number of users collected: 800
+Number of users collected: 641
 Number of messages collected: 1000
 
 Number of communities discovered: 2
-Average number of users per community:300.0
+Average number of users per community:319.5
 
 Number of instances per class found: 
-	Aganist Trump Tweets: 382
-	Neutral Trump Tweets: 133
-	Support Trump Tweets: 485
+	Aganist Trump Tweets: 223
+	Neutral Trump Tweets: 146
+	Support Trump Tweets: 631
 
 Number of instances per class found:  
 	
-Instance of Aganist Trump Tweets: @realDonaldTrump @KamVTV @CNN They need to lose their license
+Instance of Aganist Trump Tweets: RT @realDonaldTrump: ISIS is taking credit for the terrible stabbing attack at Ohio State University by a Somali refugee who should not hav…
 	
-Instance of Neutral Trump Tweets: RT @realDonaldTrump: 'President-Elect Donald J. Trump Nominates Elaine Chao as Secretary of the Department of Transportation'
-https://t.co/…
+Instance of Neutral Trump Tweets: RT @Perbler: America: @realDonaldTrump is President Elect
+
+Me: https://t.co/YSJ28F3gBt
 	
-Instance of Support Trump Tweets: RT @jkjackson22: If @realDonaldTrump is telling the truth and millions voted illegally, shouldn't we have a do-over election to make sure w…
+Instance of Support Trump Tweets: RT @realDonaldTrump: I will be going to Indiana on Thursday to make a major announcement concerning Carrier A.C. staying in Indianapolis. G…
 
 
-There are 0.22474226804123712% femal Support Trump and 0.27628865979381445% male
-
-In Support Trump tweets, one female name is :Fern Burg	 male name :Samuel Jackson
+There are 0.2630744849445325% femal Support Trump and 0.14896988906497624% male
+In Support Trump tweets, one female name is :AZ4Trump	 male name :Andrew Jackson
 	
-There are 0.2631578947368421% femal neutral Trump and 0.21052631578947367% male
-
-
-In Neutral Trump tweets, one female name is :Rebekah Hook-Held	 male name :Paul Hart
+There are 0.2465753424657534% femal neutral Trump and 0.2945205479452055% male
+In Neutral Trump tweets, one female name is :Randa Slim	 male name :Alex Landin
 	
-There are  0.12827225130890052% femal againist Trump and0.29842931937172773% male
-
-
-In Againist Trump tweets, one female name is :Fern Burg	 male name :Steve Portaro
+There are  0.13452914798206278% femal againist Trump and0.33183856502242154% male
+In Againist Trump tweets, one female name is :Sheila Hurlburt	 male name :John S.
