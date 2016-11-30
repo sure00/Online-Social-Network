@@ -1,19 +1,34 @@
-Number of users collected: 1000
+Number of users collected: 800
 Number of messages collected: 1000
 
 Number of communities discovered: 2
-Average number of users per community:396.5
+Average number of users per community:300.0
 
 Number of instances per class found: 
-	Aganist Trump Tweets: 290
-	Neutral Trump Tweets: 256
-	Support Trump Tweets: 454
+	Aganist Trump Tweets: 382
+	Neutral Trump Tweets: 133
+	Support Trump Tweets: 485
 
 Number of instances per class found:  
-	Instance of Aganist Trump Tweets: Hey @Reince, @realDonaldTrump is a coward, a little nothing of a man who's scared of words -- and your fault. Just thought you should know.
-	Instance of Neutral Trump Tweets: @realDonaldTrump just like idiots who mocks or calls persons with disabilities "retarded" you jackass, Here's a concept, start respecting -&gt;
-	Instance of Support Trump Tweets: @realDonaldTrump Mr. President Elect, I am writing to say I believe in you 100%, and, please make GOLD our backing to the Dollar again
+	
+Instance of Aganist Trump Tweets: @realDonaldTrump @KamVTV @CNN They need to lose their license
+	
+Instance of Neutral Trump Tweets: RT @realDonaldTrump: 'President-Elect Donald J. Trump Nominates Elaine Chao as Secretary of the Department of Transportation'
+https://t.co/…
+	
+Instance of Support Trump Tweets: RT @jkjackson22: If @realDonaldTrump is telling the truth and millions voted illegally, shouldn't we have a do-over election to make sure w…
 
-	For the tweets that Support Trump there are 0.30176211453744495% femal 0.2555066079295154% male
-	For the tweets that Neutral Trump there are 0.109375% femal 0.26953125% male
-	For the tweets that Againist Trump there are 0.1206896551724138% femal 0.2517241379310345% male
+
+There are 0.22474226804123712% femal Support Trump and 0.27628865979381445% male
+
+In Support Trump tweets, one female name is :Fern Burg	 male name :Samuel Jackson
+	
+There are 0.2631578947368421% femal neutral Trump and 0.21052631578947367% male
+
+
+In Neutral Trump tweets, one female name is :Rebekah Hook-Held	 male name :Paul Hart
+	
+There are  0.12827225130890052% femal againist Trump and0.29842931937172773% male
+
+
+In Againist Trump tweets, one female name is :Fern Burg	 male name :Steve Portaro

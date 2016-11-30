@@ -85,27 +85,81 @@ def main():
 
     #print(tweets[2]['text'])
 
-    summary.append('\tInstance of Aganist Trump Tweets: ' + str(tweets[(classify['Againist_idx'])[-1]]['text']))
-    summary.append('\tInstance of Neutral Trump Tweets: ' + str(tweets[(classify['Neutral_idx'])[-1]]['text']))
-    summary.append('\tInstance of Support Trump Tweets: ' + str(tweets[(classify['Support_idx'])[-1]]['text']))
+    summary.append('\t\nInstance of Aganist Trump Tweets: ' + str(tweets[(classify['Againist_idx'])[-1]]['text']))
+    summary.append('\t\nInstance of Neutral Trump Tweets: ' + str(tweets[(classify['Neutral_idx'])[-1]]['text']))
+    summary.append('\t\nInstance of Support Trump Tweets: ' + str(tweets[(classify['Support_idx'])[-1]]['text']))
 
     #print([(classify['Againist_idx'])[1]])
     #print([(classify['Neutral_idx'])[1]])
     #print([(classify['Support_idx'])[1]])
 
     SupportGender = Counter(classify['SupportGender'])
-    #print(SupportGender)
     NeutralGender= Counter(classify['NeutralGender'])
     AgainistGender= Counter(classify['AgainistGender'])
 
-    summary.append('\n\tFor the tweets that Support Trump there are ' + str(SupportGender[1]/sum(SupportGender.values())) + '% femal '
+    summary.append('\n\nThere are ' + str(SupportGender[1]/sum(SupportGender.values())) + '% femal Support Trump and '
                    + str(SupportGender[0]/sum(SupportGender.values())) + '% male')
 
-    summary.append('\tFor the tweets that Neutral Trump there are ' + str(NeutralGender[1]/sum(NeutralGender.values())) + '% femal '
-                   + str(NeutralGender[0]/sum(NeutralGender.values())) + '% male')
+    #print("Againist_idx",classify['Againist_idx'])
+    getFemal =getMale=0
+    for index in range(len(classify['SupportGender'])):
+        if getFemal == 1 and getMale ==1:
+            print(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name'])
+            print(tweets[classify['Againist_idx'][maleNameId]]['user']['name'])
 
-    summary.append('\tFor the tweets that Againist Trump there are ' + str(AgainistGender[1]/sum(AgainistGender.values())) + '% femal '
-                   + str(AgainistGender[0]/sum(AgainistGender.values())) + '% male')
+            summary.append('\nIn Support Trump tweets, one female name is :' +
+                           str(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name']) + '\t male name :'
+                           + str(tweets[classify['Againist_idx'][maleNameId]]['user']['name']))
+
+            break
+        if getFemal ==0 and classify['SupportGender'][index] == 1:
+            femaleNamesID= index
+            getFemal=1
+        if getMale ==0 and classify['SupportGender'][index] == 0:
+            maleNameId=index
+            getMale =1
+
+
+    summary.append('\t\nThere are ' + str(NeutralGender[1]/sum(NeutralGender.values())) + '% femal neutral Trump and '
+                   + str(NeutralGender[0]/sum(NeutralGender.values())) + '% male\n')
+
+    #print("Againist_idx",classify['Againist_idx'])
+    getFemal =getMale=0
+    for index in range(len(classify['NeutralGender'])):
+        if getFemal == 1 and getMale ==1:
+            print(tweets[classify['Neutral_idx'][femaleNamesID]]['user']['name'])
+            print(tweets[classify['Neutral_idx'][maleNameId]]['user']['name'])
+
+            summary.append('\nIn Neutral Trump tweets, one female name is :' +
+                           str(tweets[classify['Neutral_idx'][femaleNamesID]]['user']['name']) + '\t male name :'
+                           + str(tweets[classify['Neutral_idx'][maleNameId]]['user']['name']))
+            break
+        if getFemal ==0 and classify['NeutralGender'][index] == 1:
+            femaleNamesID= index
+            getFemal=1
+        if getMale ==0 and classify['NeutralGender'][index] == 0:
+            maleNameId=index
+            getMale =1
+
+    summary.append('\t\nThere are  ' + str(AgainistGender[1]/sum(AgainistGender.values())) + '% femal againist Trump and'
+                   + str(AgainistGender[0]/sum(AgainistGender.values())) + '% male\n')
+
+    getFemal =getMale=0
+    for index in range(len(classify['AgainistGender'])):
+        if getFemal == 1 and getMale ==1:
+            print(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name'])
+            print(tweets[classify['Againist_idx'][maleNameId]]['user']['name'])
+
+            summary.append('\nIn Againist Trump tweets, one female name is :' +
+                           str(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name']) + '\t male name :'
+                           + str(tweets[classify['Againist_idx'][maleNameId]]['user']['name']))
+            break
+        if getFemal ==0 and classify['AgainistGender'][index] == 1:
+            femaleNamesID= index
+            getFemal=1
+        if getMale ==0 and classify['AgainistGender'][index] == 0:
+            maleNameId=index
+            getMale =1
 
     saveData(summary,summaryFile)
     print("Summarize Done")
