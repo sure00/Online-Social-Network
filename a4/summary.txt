@@ -1,30 +1,28 @@
-Number of users collected: 641
-Number of messages collected: 1000
+Number of users collected: 521
+Number of messages collected: 1500
 
 Number of communities discovered: 2
-Average number of users per community:319.5
+Average number of users per community:256.5
 
 Number of instances per class found: 
-	Aganist Trump Tweets: 223
-	Neutral Trump Tweets: 146
-	Support Trump Tweets: 631
+	Aganist Trump Tweets: 362
+	Neutral Trump Tweets: 400
+	Support Trump Tweets: 738
 
 Number of instances per class found:  
 	
-Instance of Aganist Trump Tweets: RT @realDonaldTrump: ISIS is taking credit for the terrible stabbing attack at Ohio State University by a Somali refugee who should not hav…
+Instance of Aganist Trump Tweets: @dover_louise @justinhendrix @realDonaldTrump only by someone like you. Bend over trump is coming or maybe your the type that kneels.
 	
-Instance of Neutral Trump Tweets: RT @Perbler: America: @realDonaldTrump is President Elect
-
-Me: https://t.co/YSJ28F3gBt
+Instance of Neutral Trump Tweets: RT @RiskyLiberal: .@realdonaldtrump You're hundreds of millions in debt to Russian oligarchs, National Bank of China. Sell your business of…
 	
-Instance of Support Trump Tweets: RT @realDonaldTrump: I will be going to Indiana on Thursday to make a major announcement concerning Carrier A.C. staying in Indianapolis. G…
+Instance of Support Trump Tweets: RT @realDonaldTrump: Nobody should be allowed to burn the American flag - if they do, there must be consequences - perhaps loss of citizens…
 
 
-There are 0.2630744849445325% femal Support Trump and 0.14896988906497624% male
-In Support Trump tweets, one female name is :AZ4Trump	 male name :Andrew Jackson
+There are 0.25745257452574527% femal Support Trump and 0.21680216802168023% male
+In Support Trump tweets, one female name is :Cindy Guiltner	 male name :ANTI-ESTABLISHMENT
 	
-There are 0.2465753424657534% femal neutral Trump and 0.2945205479452055% male
-In Neutral Trump tweets, one female name is :Randa Slim	 male name :Alex Landin
+There are 0.1675% femal neutral Trump and 0.3125% male
+In Neutral Trump tweets, one female name is :Karin Barnes	 male name :Joyce Evans
 	
-There are  0.13452914798206278% femal againist Trump and0.33183856502242154% male
-In Againist Trump tweets, one female name is :Sheila Hurlburt	 male name :John S.
+There are  0.23756906077348067% femal againist Trump and0.40331491712707185% male
+In Againist Trump tweets, one female name is :Cindy Guiltner	 male name :Richard Vincent

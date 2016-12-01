@@ -199,7 +199,7 @@ if __name__ == '__main__':
     print("start to collect twittes")
 
     #collect twittes data
-    twitters = getTwittesData(twitter, limit=10)
+    twitters = getTwittesData(twitter, limit=15)
     #print(twitters)
     saveData(twitters, twitterFile)
 

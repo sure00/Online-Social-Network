@@ -103,14 +103,12 @@ def main():
             maleNameId=index
             getMale =1
 
-
     summary.append('\t\nThere are ' + str(NeutralGender[1]/sum(NeutralGender.values())) + '% femal neutral Trump and '
                    + str(NeutralGender[0]/sum(NeutralGender.values())) + '% male')
 
     getFemal =getMale=0
     for index in range(len(classify['NeutralGender'])):
         if getFemal == 1 and getMale ==1:
-
             summary.append('In Neutral Trump tweets, one female name is :' +
                            str(tweets[classify['Neutral_idx'][femaleNamesID]]['user']['name']) + '\t male name :'
                            + str(tweets[classify['Neutral_idx'][maleNameId]]['user']['name']))
@@ -128,7 +126,6 @@ def main():
     getFemal =getMale=0
     for index in range(len(classify['AgainistGender'])):
         if getFemal == 1 and getMale ==1:
-
             summary.append('In Againist Trump tweets, one female name is :' +
                            str(tweets[classify['Againist_idx'][femaleNamesID]]['user']['name']) + '\t male name :'
                            + str(tweets[classify['Againist_idx'][maleNameId]]['user']['name']))
