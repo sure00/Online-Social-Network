@@ -1,0 +1,29 @@
+In this homework, we use twitter API to analysis what people talking about Tramp who is the president of American. We collect 1000 tweets and hundreds of users¡¯ information to analysis the sentiment that talking on Twitter and the analysis the demographic of twitters such as gender.  Next, we will show the process of my code.
+
+Collection:
+	In order to collect data, we used the twitter api
+	robust_request(twitter,'search/tweets', {'q': searchKey, 'count': 4000})
+	robust_request(twitter, 'friends/ids', {'user_id': user_id}, 5 )
+
+to fetch the data which contain the key words ¡°@realDonaldTrump¡±.  We collect 1,000 tweets and 641 user¡¯s information and saved it to files ¡®tweets.pkl¡¯ and ¡®user.pkl¡¯. To filter the users that do not have mentioned about Trump, we fetch the user time line for the user and filter the words. While, it cost lots of time to analysis the data. So the calling of that function is disabled 
+
+Cluster
+The data which used in Cluster is ¡®user.pkl¡¯ which is collected in the collect.py. Follow the notes in the class, in order to get more connection between each component, Jaccard algorithm is been used. JaccardScore = calcJaccard(users, 3). Make an unweighted graph, using only edges with Jaccard greater than 3.  Construct the network is easy as connect each edge to construct the network.  Girvan_newman algorithm is been used to cluster the network to two components. Each component have about hundreds users. We save the result to network.png and component0.png, component1.png and ¡®cluster.pkl¡¯ to save the results.
+Classify
+	The data used in Classify is ¡®tweets.pkl¡¯ which get from collection.py. 
+	In order to get the training data of Sentiment, we download the training data from network. http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip.
+	To classify the gender, census name database is needed to get the gender of tweets user.
+	
+	In order to predict the sentiment of tweets, the downloaded sentiment data is been used to train the model. After calling fit function to train the model, Sentiment result can be get. In code, I classify three group. Support Neutral and Against tweets about trump.
+	Next, based on the sentiment classify result, the gender is being analysis. Follow the notebook, the first name is felted from the tweets and check whether it is female name or male name.
+	The result of sentiment and gender are saved to file 'classify.pkl'
+
+Analysis:
+	The result which save in collect, cluster and classify period is used in this period.
+	Follow the requiring of assignment 4, few information such as sentiment instance and gender instance are saved in the summary.txt file.
+RELATED:
+	Base on the keywords ¡®@realDonaldTrump¡¯, tweets data can be collected from the network. With that, we performed analysis which helped to classify tweets to different categorize that support trump, against trump. 
+
+Conclusion:
+	My homework focus on classify tweets into three categories and each categories have subcategories for gender ¨C male and female.  The percentage of male and female for support trump, against trump and Neutral Trump Tweets are classified. To construct the community network, the friends of tweets owner are collected. To filter out the people who do not have any tweets that talk about trump, the friends filter is created.  Similar like the assignmen1, communication detection algorithm is being used to cluster the network. Classify which using machine learning is interesting. If using the public data to training the model and predict the collected tweets, sometime it is not accuracy.  I am confused about that. Meanwhile, in the note book, training data is label first by some method and then train it and predict the test data. But if we can label training data, we do not need to predict the test data as we can follow the method which used to label the training data to label the test data.
+	Next, I will classify where the trump most significant support come from. Meanwhile, I plane to analysis more data such as the job of tweets owner and family information and some other information. With that we can get the idea why trump win the election and what lead American people needed.
