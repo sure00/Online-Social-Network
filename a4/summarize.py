@@ -85,8 +85,8 @@ def main():
     NeutralGender= Counter(classify['NeutralGender'])
     AgainistGender= Counter(classify['AgainistGender'])
 
-    summary.append('\n\nThere are ' + str(SupportGender[1]/sum(SupportGender.values())) + '% femal Support Trump and '
-                   + str(SupportGender[0]/sum(SupportGender.values())) + '% male')
+    summary.append('\n\nThere are ' + str(SupportGender[1]/sum(SupportGender.values())*100) + '% femal Support Trump and '
+                   + str(SupportGender[0]/sum(SupportGender.values())*100) + '% male')
 
     getFemal =getMale=0
     for index in range(len(classify['SupportGender'])):
@@ -103,8 +103,8 @@ def main():
             maleNameId=index
             getMale =1
 
-    summary.append('\t\nThere are ' + str(NeutralGender[1]/sum(NeutralGender.values())) + '% femal neutral Trump and '
-                   + str(NeutralGender[0]/sum(NeutralGender.values())) + '% male')
+    summary.append('\t\nThere are ' + str(NeutralGender[1]/sum(NeutralGender.values())*100) + '% femal neutral Trump and '
+                   + str(NeutralGender[0]/sum(NeutralGender.values())*100) + '% male')
 
     getFemal =getMale=0
     for index in range(len(classify['NeutralGender'])):
@@ -120,8 +120,8 @@ def main():
             maleNameId=index
             getMale =1
 
-    summary.append('\t\nThere are  ' + str(AgainistGender[1]/sum(AgainistGender.values())) + '% femal againist Trump and'
-                   + str(AgainistGender[0]/sum(AgainistGender.values())) + '% male')
+    summary.append('\t\nThere are  ' + str(AgainistGender[1]/sum(AgainistGender.values())*100) + '% femal againist Trump and'
+                   + str(AgainistGender[0]/sum(AgainistGender.values())*100) + '% male')
 
     getFemal =getMale=0
     for index in range(len(classify['AgainistGender'])):
